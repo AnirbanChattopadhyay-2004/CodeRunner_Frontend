@@ -50,7 +50,7 @@ export default function Landuppage(){
           try {
               const response = await axios.request(options);
               console.log(response.data);
-              const res=await axios.post(url+"codes/add",{...form,code:value,stdout:atob(response.data.stdout),status:response.data.status.description})
+              const res=await axios.post(url+"/codes/add",{...form,code:value,stdout:atob(response.data.stdout),status:response.data.status.description})
               navigate("/page");
             } catch (error) {
                 console.error(error);

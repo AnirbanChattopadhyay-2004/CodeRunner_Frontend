@@ -20,7 +20,7 @@ export default function Page2(){
             
             setDetails(await client.get("codes"))
             if(details.length==0){
-                const res=await axios.get(url+"codes")
+                const res=await axios.get(url+"/codes")
                 await client.set("codes",res.data.reverse())
                 
                 setDetails(res.data)
@@ -32,7 +32,7 @@ export default function Page2(){
                 let a=codes;
                 
                 while(true){
-                    let code=await axios.get(url+"codes/"+(a[0].id+1))
+                    let code=await axios.get(url+"/codes/"+(a[0].id+1))
                     if(code.data.length==0 || !code)
                     break
                 a.unshift(code.data)
