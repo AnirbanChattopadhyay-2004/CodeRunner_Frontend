@@ -46,10 +46,10 @@ export default function Page2(){
     },[])
 
     return (
-        <div className="flex w-full flex-col justify-center gap-20 p-20 items-center h-auto bg-hero-pattern">
+        <div className="flex w-full flex-col justify-center gap-20 p-20 items-center  bg-hero-pattern min-h-[100vh]" >
             <button type="button" onClick={()=>navigate("/")} className="focus:outline-none p-5 text-white bg-tertiary hover:bg-purple-800 focus:ring-4  font-medium rounded-lg text-sm px-5 py-2.5 mb-2 dark:bg-purple-600 dark:hover:bg-purple-700 ">Go Back</button>
-<div className="relative overflow-x-auto shadow-md flex-1 rounded-sm">
-    <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+<div className=" relative flex overflow-x-auto shadow-md flex-1 rounded-sm sm:w-full h-auto ">
+    <table className="w-full table-auto text-sm text-left rtl:text-right  text-gray-500 dark:text-gray-400">
         <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
             <tr>
                 <th scope="col" className="px-6 py-3">

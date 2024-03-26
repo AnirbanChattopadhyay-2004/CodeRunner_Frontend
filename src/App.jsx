@@ -10,7 +10,7 @@ function App() {
       <Routes>
       
     <Route path="/" element={<Landuppage/>}/>
-    <Route path="/page" element={<div className="bg-hero-pattern h-[100vh]"> <Page2/> </div>}/>
+    <Route path="/page" element={<div className="bg-hero-pattern min-h-[400vh] sm:w-full w-[400vw]"> <Page2/> </div>}/>
  
   
     </Routes>

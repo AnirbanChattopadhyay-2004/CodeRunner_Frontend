@@ -70,8 +70,8 @@ export default function Landuppage(){
         setForm({...form,[name]:value})
     }
     return (
-        <div className="flex flex-row items-center justify-center w-full h-auto  bg-hero-pattern  ">
-        <form onSubmit={handleSubmit} className="mt-10 w-1/2 flex flex-col gap-10 bg-black p-5 rounded-2xl">
+        <div className="flex flex-row items-center justify-center w-full h-auto py-20 bg-hero-pattern  ">
+        <form onSubmit={handleSubmit} className="mt-10 w-3/4 md:w-1/2 flex flex-col gap-10 bg-black p-5 rounded-2xl">
                     <label className="flex flex-col gap-3 ">
                         <p className="text-white font-black">Name</p>
                         <input type="text" name="name" value={form.name} onChange={handlechange} className="bg-tertiary h-12 rounded-lg  border-none outline-none p-5 text-white-100" placeholder="What's your good name?" required/>
