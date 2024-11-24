@@ -4,13 +4,12 @@ import Row from "./Row"
 import { useNavigate } from "react-router-dom"
  
 import { Redis } from "https://esm.sh/@upstash/redis";
-
 const client = new Redis({
-    url: import.meta.env.VITE_reddisurl,
-    token: import.meta.env.VITE_reddistoken,
+    url: import.meta.env.VITE_reddisurl || "https://generous-eel-36876.upstash.io",
+    token: import.meta.env.VITE_reddistoken || "AZAMAAIjcDFkMTY1M2M2MzYyNDk0ZDJmYWI0NDZiMGMzNjc0NDgwYXAxMA",
 })
 export default function Page2(){
-    const url=import.meta.env.VITE_backendurl
+    const url=import.meta.env.VITE_backendurl || "https://coderunner-backend-1xek.onrender.com"
       const navigate = useNavigate()
     
     const [details,setDetails]=useState([])
