@@ -27,9 +27,9 @@ export default function Page2(){
             }
             else{
                 // 
-                let codes=await client.get("codes");
+                let codes=details;
                 let a=codes;
-                
+                console.log(a)
                 while(true){
                     let code=await axios.get(url+"/codes/"+(a[0].id+1))
                     if(code.data.length==0 || !code)
@@ -43,7 +43,8 @@ export default function Page2(){
         }
         getData()
     },[])
-
+    if(!details)
+        return <div>Loading...</div>
     return (
         <div className="flex w-full flex-col justify-center gap-20 p-20 items-center  bg-hero-pattern min-h-[100vh]" >
             <button type="button" onClick={()=>navigate("/")} className="focus:outline-none p-5 text-white bg-tertiary hover:bg-purple-800 focus:ring-4  font-medium rounded-lg text-sm px-5 py-2.5 mb-2 dark:bg-purple-600 dark:hover:bg-purple-700 ">Go Back</button>
@@ -71,6 +72,12 @@ export default function Page2(){
                 </th>
                 <th scope="col" className="px-6 py-3">
                     Output 
+                </th>
+                <th scope="col" className="px-6 py-3">
+                    Copy 
+                </th>
+                <th scope="col" className="px-6 py-3">
+                    Share 
                 </th>
             </tr>
         </thead>

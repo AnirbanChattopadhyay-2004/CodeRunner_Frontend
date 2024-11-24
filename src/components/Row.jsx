@@ -1,5 +1,7 @@
-export default function Row({username,stdinput,sourcecode,language,created,stdoutput,status}){
+
+export default function Row({id,username,stdinput,sourcecode,language,created,stdoutput,status}){
     function convertUTCToIST(utcDateString) {
+        console.log(id)
         try {
             // Create a new Date object from the provided UTC date string
             const utcDate = new Date(utcDateString);
@@ -48,6 +50,13 @@ export default function Row({username,stdinput,sourcecode,language,created,stdou
         </td>
         <td className="px-6 py-4 ">
             {stdoutput}
+        </td>
+        <td className="px-6 py-4 cursor-pointer hover:text-red-500 " onClick={()=>{ navigator.clipboard.writeText(sourcecode);
+}}>
+            Copy
+        </td>
+        <td className="px-6 py-4 cursor-pointer" onClick={()=>{navigator.clipboard.writeText("http://localhost:5173/page/"+id)}}>
+            Share
         </td>
     </tr>
     )

@@ -29,6 +29,8 @@ export default function Landuppage() {
     language: "javascript",
     stdin: "",
   });
+  const [rundissable,setRundissable ] = useState(false);
+  const [submitdissable,setSubmitdissable ] = useState(false);
   const [output,setOutput]=useState("")
   const [selectedLanguage, setSelectedLanguage] = useState();
   const [activeTab, setActiveTab] = useState("input");
@@ -71,12 +73,14 @@ export default function Landuppage() {
           stdout: atob(response.data.stdout) || atob(response.data.message),
           status: response.data.status.description,
         });
+        setSubmitdissable(false)
         navigate("/page");
       } else {
         if(response.data.stdout)
         setOutput(atob(response.data.stdout))
         else
         setOutput(atob(response.data.message))
+      setRundissable(false)
       }
     } catch (error) {
       console.error(error);
@@ -148,7 +152,7 @@ export default function Landuppage() {
           <Lottie animationData={animationData} />
           
         </div>
-        <p className="text-lg text-gray-300 italic font-semibold">
+        <p className="text-lg text-gray-300 italic font-semibold text-center">
           "Code is the canvas, logic is the brush, and innovation is the masterpiece."
       </p>
          </div>
@@ -159,9 +163,9 @@ export default function Landuppage() {
         </div>
         
       </div>
-      <div className="h-[100vh] w-full flex items-center justify-center">
-        <div className=" flex flex-1 p-5 gap-5">
-          <div className="w-3/5">
+      <div className="min-h-[100vh] w-full flex items-center justify-center max-sm:flex-col">
+        <div className=" flex flex-1 p-5 gap-5 max-sm:flex-col ">
+          <div className="w-3/5 max-sm:w-[90vw] max-sm:p-5">
             <CodeMirror
               value={value}
               height="90vh"
@@ -169,14 +173,15 @@ export default function Landuppage() {
               theme={tokyoNight}
               extensions={[languageExtensions[form.language]()]}
               onChange={onChange}
-              style={{fontSize:"21px"}}
+              style={{fontSize:"18px"}}
+              maxWidth="80vw"
             />
           </div>
           <div className="flex flex-col flex-1 gap-5">
-            <div className="flex flex-col justify-between  items-center flex-1 ">
-              <div className="w-full flex gap-3 items-center flex-1">
-                <button type="button" onClick={()=>{handleSubmit("Run")}} className="bg-blue-500 flex-1 h-[50%] rounded-md">Run</button>
-                <button type="button" onClick={()=>{handleSubmit("Submit")}} className="bg-green-500 flex-1 h-[50%] rounded-md">Submit</button>
+            <div className="flex flex-col justify-between  items-center flex-1 max-sm:gap-5">
+              <div className="w-full flex gap-3 items-center flex-1 ">
+                <button type="button" onClick={()=>{setRundissable(true);handleSubmit("Run") }} className={`bg-blue-500 text-white font-semibold  flex-1 h-[50%] max-sm:h-[48px]  rounded-md ${rundissable?"bg-blue-700 ":""}` } disabled={rundissable}>{rundissable?<svg xmlns="http://www.w3.org/2000/svg" viewBox="-350 20 1000 200"><circle fill="#8DDEFF" stroke="#8DDEFF" stroke-width="2" r="15" cx="40" cy="65"><animate attributeName="cy" calcMode="spline" dur="2" values="65;135;65;" keySplines=".5 0 .5 1;.5 0 .5 1" repeatCount="indefinite" begin="-.4"></animate></circle><circle fill="#8DDEFF" stroke="#8DDEFF" stroke-width="2" r="15" cx="100" cy="65"><animate attributeName="cy" calcMode="spline" dur="2" values="65;135;65;" keySplines=".5 0 .5 1;.5 0 .5 1" repeatCount="indefinite" begin="-.2"></animate></circle><circle fill="#8DDEFF" stroke="#8DDEFF" stroke-width="2" r="15" cx="160" cy="65"><animate attributeName="cy" calcMode="spline" dur="2" values="65;135;65;" keySplines=".5 0 .5 1;.5 0 .5 1" repeatCount="indefinite" begin="0"></animate></circle></svg>:"Run"}</button>
+                <button type="button" onClick={()=>{setSubmitdissable(true); handleSubmit("Submit")}} className={`bg-green-500 text-white font-semibold flex-1 h-[50%] max-sm:h-[48px] rounded-md ${rundissable?"bg-green-700":""}`} disabled={submitdissable}>{submitdissable?<svg xmlns="http://www.w3.org/2000/svg" viewBox="-350 20 1000 200"><circle fill="#00FF49" stroke="#00FF49" stroke-width="2" r="15" cx="40" cy="65"><animate attributeName="cy" calcMode="spline" dur="2" values="65;135;65;" keySplines=".5 0 .5 1;.5 0 .5 1" repeatCount="indefinite" begin="-.4"></animate></circle><circle fill="#00FF49" stroke="#00FF49" stroke-width="2" r="15" cx="100" cy="65"><animate attributeName="cy" calcMode="spline" dur="2" values="65;135;65;" keySplines=".5 0 .5 1;.5 0 .5 1" repeatCount="indefinite" begin="-.2"></animate></circle><circle fill="#00FF49" stroke="#00FF49" stroke-width="2" r="15" cx="160" cy="65"><animate attributeName="cy" calcMode="spline" dur="2" values="65;135;65;" keySplines=".5 0 .5 1;.5 0 .5 1" repeatCount="indefinite" begin="0"></animate></circle></svg>:"Submit"}</button>
               </div>
               <div className="grid grid-cols-2 md:grid-cols-4 w-full gap-4">
                 {languages.map((lang) => (
