@@ -2,8 +2,9 @@ import {useEffect, useState} from "react"
 import axios from "axios"
 import Row from "./Row"
 import { useNavigate } from "react-router-dom"
- 
+// import { Redis } from '@upstash/redis'
 import { Redis } from "https://esm.sh/@upstash/redis";
+
 const client = new Redis({
     url: import.meta.env.VITE_reddisurl || "https://generous-eel-36876.upstash.io",
     token: import.meta.env.VITE_reddistoken || "AZAMAAIjcDFkMTY1M2M2MzYyNDk0ZDJmYWI0NDZiMGMzNjc0NDgwYXAxMA",
@@ -26,7 +27,7 @@ export default function Page2(){
                 
             }
             else{
-                // 
+                
                 let codes=details;
                 let a=codes;
                 console.log(a)

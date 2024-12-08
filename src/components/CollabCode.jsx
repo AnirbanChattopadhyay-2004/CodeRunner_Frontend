@@ -36,7 +36,7 @@ export default function CollabCode() {
             console.log(socket.id); // x8WIv7-mJelg7on_ALbx
           });
           socket.emit("join room",room)
-          socket.on("receive code", (data) => {   
+          socket.on("receive code", (data) => {     
              console.log(data); 
             setCode(data);
           });

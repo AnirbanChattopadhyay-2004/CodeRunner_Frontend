@@ -13,6 +13,73 @@ import { python } from "@codemirror/lang-python";
 import { cpp } from "@codemirror/lang-cpp";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { EditorView, basicSetup } from "@codemirror/basic-setup";
+import { HighlightStyle, tags } from "@codemirror/highlight";
+import { createTheme } from "@uiw/codemirror-themes";
+import { autocompletion,completeFromList } from "@codemirror/autocomplete";
+import {stringMethods ,mathMethods,collectionsMethods,javaKeywords,javaStandardLibrary} from "../assets/java"
+const leetCodeTheme = createTheme({
+  theme: "dark",
+  settings: {
+    background: "#1e1e1e", // LeetCode-like dark background
+    foreground: "#f5f5f5", // Light foreground
+    caret: "#ffcc00",      // Yellow caret
+    selection: "#4a4a4a",  // Darker selection
+    gutterBackground: "#1e1e1e", // Match the editor background
+    gutterForeground: "#7d8590", // Subtle gutter text
+    lineHighlight:"#2A2A2A"
+  },
+  styles: [
+    { tag: tags.keyword, color: "#c792ea" },       // Purple for keywords
+    { tag: tags.comment, color: "#355E3B" },       // Green for comments
+    { tag: tags.string, color: "#ecc48d" },        // Light yellow for strings
+    { tag: tags.variableName, color: "#82aaff" }, // Blue for variables
+    { tag: tags.function, color: "#addb67" },     // Green for functions
+  ],
+});
+const javaMethods = {
+  String: stringMethods,
+  Math: mathMethods,
+  Collections: collectionsMethods,
+  // Add similar entries for other classes
+};
+
+const javaCompletions = (context) => {
+  const word = context.matchBefore(/\w*/);
+  if (!word || (word.from === word.to && !context.explicit)) return null;
+  
+  // Combine all suggestions
+  const options = [
+    ...javaKeywords.map(keyword => ({ label: keyword, type: "keyword" })),
+    ...javaStandardLibrary.map(lib => ({ label: lib, type: "class" })),
+    ...(javaMethods[word.text]?.map(method => ({ label: method, type: "method" })) || []),
+  ];
+
+  return {
+    from: word.from,
+    options,
+  };
+};
+const customCompletions = {
+  javascript: completeFromList([
+    { label: "console.log", type: "function", detail: "Log output to console" },
+    { label: "function", type: "keyword" },
+    { label: "const", type: "keyword" },
+    { label: "let", type: "keyword" },
+  ]),
+  python: completeFromList([
+    { label: "print", type: "function", detail: "Output to console" },
+    { label: "def", type: "keyword" },
+    { label: "import", type: "keyword" },
+  ]),
+  cpp: completeFromList([
+    { label: "std::cout", type: "function", detail: "Print to console" },
+    { label: "int", type: "keyword" },
+    { label: "return", type: "keyword" },
+  ]),
+  java: javaCompletions
+};
+
 const languageExtensions = {
   javascript: javascript,
   java: java,
@@ -23,7 +90,7 @@ export default function Landuppage() {
   const url =
     import.meta.env.VITE_backendurl ||
     "https://coderunner-backend-1xek.onrender.com";
-  const navigate = useNavigate();
+    const navigate = useNavigate();
   const [form, setForm] = useState({
     name: "",
     language: "javascript",
@@ -104,43 +171,9 @@ export default function Landuppage() {
     setForm({ ...form, [name]: value });
   }
   return (
-    <div className="w-full bg-hero-pattern bg-cover ">
-      {/* <form onSubmit={handleSubmit} className="mt-10 w-3/4 md:w-1/2 flex flex-col gap-10 bg-black p-5 rounded-2xl">
-                    <label className="flex flex-col gap-3 ">
-                        <p className="text-white font-black">Name</p>
-                        <input type="text" name="name" value={form.name} onChange={handlechange} className="bg-tertiary h-12 rounded-lg  border-none outline-none p-5 text-white-100" placeholder="What's your good name?" required/>
-                    </label>
+    <div className="w-full ">
+      <div className="h-[100vh]  flex justify-center bg-hero-pattern bg-cover ">
         
-                     <label className="flex flex-col gap-3 ">
-                        <p className="text-white font-black">Language</p> 
-                       
-                        <select id="countries" name="language" onChange={handlechange} className="bg-tertiary h-12 border-none outline-none text-sm rounded-lg  block w-full p-3 dark:bg-tertiary  text-white-100  " required>
-    
-                                    <option  value="javascript">Javascript</option>
-                                    <option  value="java"  >Java</option>
-                                    <option  value="cpp">c++</option>
-                                    <option  value="python">Python</option>
-                        </select>
-
-                        </label>
-
-                    
-
-
-                    <label className="flex flex-col gap-3 ">
-                        <p className="text-white font-black">Standard Input</p>
-                        <textarea name="stdin" rows={3} value={form.stdin} onChange={handlechange} className="bg-tertiary text-white rounded-lg border-none outline-none p-5" placeholder="What's the Input ?" />
-                    </label>
-                    
-                    <label className="flex flex-col gap-3 ">
-                        <p className="text-white font-black">Code Snippet</p>
-                        <CodeMirror value={value} height="200px" theme={tokyoNight}   onChange={onChange} extensions={[java()]} />
-                    </label>
-                    
-                    <button type="submit" className="bg-tertiary h-10 shadow-xl rounded-lg  text-white ">Submit</button>
-                    
-                    </form> */}
-      <div className="h-[100vh] flex justify-center bg-hero-pattern bg-cover ">
         <div className="flex flex-col items-center justify-center">
         <div className="flex h-[18vh] w-[40vw] justify-between ">
           <Lottie animationData={animationData2} />
@@ -163,15 +196,21 @@ export default function Landuppage() {
         </div>
         
       </div>
-      <div className="min-h-[100vh] w-full flex items-center justify-center max-sm:flex-col">
+      <div className="min-h-[100vh] bg-gradient-to-b from-[#000634] via-blue-950 to-black w-full flex items-center justify-center max-sm:flex-col">
+        
         <div className=" flex flex-1 p-5 gap-5 max-sm:flex-col ">
           <div className="w-3/5 max-sm:w-[90vw] max-sm:p-5">
             <CodeMirror
               value={value}
               height="90vh"
               width="100%"
-              theme={tokyoNight}
-              extensions={[languageExtensions[form.language]()]}
+              theme={leetCodeTheme}
+              extensions={[form.language == 'java'?java():languageExtensions[form.language](),
+                
+                autocompletion({ override: [customCompletions[form.language]] }),
+
+              
+              ]}
               onChange={onChange}
               style={{fontSize:"18px"}}
               maxWidth="80vw"
@@ -180,8 +219,8 @@ export default function Landuppage() {
           <div className="flex flex-col flex-1 gap-5">
             <div className="flex flex-col justify-between  items-center flex-1 max-sm:gap-5">
               <div className="w-full flex gap-3 items-center flex-1 ">
-                <button type="button" onClick={()=>{setRundissable(true);handleSubmit("Run") }} className={`bg-blue-500 text-white font-semibold  flex-1 h-[50%] max-sm:h-[48px]  rounded-md ${rundissable?"bg-blue-700 ":""}` } disabled={rundissable}>{rundissable?<svg xmlns="http://www.w3.org/2000/svg" viewBox="-350 20 1000 200"><circle fill="#8DDEFF" stroke="#8DDEFF" stroke-width="2" r="15" cx="40" cy="65"><animate attributeName="cy" calcMode="spline" dur="2" values="65;135;65;" keySplines=".5 0 .5 1;.5 0 .5 1" repeatCount="indefinite" begin="-.4"></animate></circle><circle fill="#8DDEFF" stroke="#8DDEFF" stroke-width="2" r="15" cx="100" cy="65"><animate attributeName="cy" calcMode="spline" dur="2" values="65;135;65;" keySplines=".5 0 .5 1;.5 0 .5 1" repeatCount="indefinite" begin="-.2"></animate></circle><circle fill="#8DDEFF" stroke="#8DDEFF" stroke-width="2" r="15" cx="160" cy="65"><animate attributeName="cy" calcMode="spline" dur="2" values="65;135;65;" keySplines=".5 0 .5 1;.5 0 .5 1" repeatCount="indefinite" begin="0"></animate></circle></svg>:"Run"}</button>
-                <button type="button" onClick={()=>{setSubmitdissable(true); handleSubmit("Submit")}} className={`bg-green-500 text-white font-semibold flex-1 h-[50%] max-sm:h-[48px] rounded-md ${rundissable?"bg-green-700":""}`} disabled={submitdissable}>{submitdissable?<svg xmlns="http://www.w3.org/2000/svg" viewBox="-350 20 1000 200"><circle fill="#00FF49" stroke="#00FF49" stroke-width="2" r="15" cx="40" cy="65"><animate attributeName="cy" calcMode="spline" dur="2" values="65;135;65;" keySplines=".5 0 .5 1;.5 0 .5 1" repeatCount="indefinite" begin="-.4"></animate></circle><circle fill="#00FF49" stroke="#00FF49" stroke-width="2" r="15" cx="100" cy="65"><animate attributeName="cy" calcMode="spline" dur="2" values="65;135;65;" keySplines=".5 0 .5 1;.5 0 .5 1" repeatCount="indefinite" begin="-.2"></animate></circle><circle fill="#00FF49" stroke="#00FF49" stroke-width="2" r="15" cx="160" cy="65"><animate attributeName="cy" calcMode="spline" dur="2" values="65;135;65;" keySplines=".5 0 .5 1;.5 0 .5 1" repeatCount="indefinite" begin="0"></animate></circle></svg>:"Submit"}</button>
+                <button type="button" onClick={()=>{setRundissable(true);handleSubmit("Run") }} className={` text-white font-semibold  flex-1 h-[50%] max-sm:h-[48px]  rounded-md ${rundissable?"bg-[#2A4A7B] cursor-not-allowed ":"bg-[#4A90E2] hover:bg-[#357ABD]"}` } disabled={rundissable}>{rundissable?<svg xmlns="http://www.w3.org/2000/svg" viewBox="-350 20 1000 200"><circle fill="#8DDEFF" stroke="#8DDEFF" stroke-width="2" r="15" cx="40" cy="65"><animate attributeName="cy" calcMode="spline" dur="2" values="65;135;65;" keySplines=".5 0 .5 1;.5 0 .5 1" repeatCount="indefinite" begin="-.4"></animate></circle><circle fill="#8DDEFF" stroke="#8DDEFF" stroke-width="2" r="15" cx="100" cy="65"><animate attributeName="cy" calcMode="spline" dur="2" values="65;135;65;" keySplines=".5 0 .5 1;.5 0 .5 1" repeatCount="indefinite" begin="-.2"></animate></circle><circle fill="#8DDEFF" stroke="#8DDEFF" stroke-width="2" r="15" cx="160" cy="65"><animate attributeName="cy" calcMode="spline" dur="2" values="65;135;65;" keySplines=".5 0 .5 1;.5 0 .5 1" repeatCount="indefinite" begin="0"></animate></circle></svg>:"Run"}</button>
+                <button type="button" onClick={()=>{setSubmitdissable(true); handleSubmit("Submit")}} className={` text-white font-semibold flex-1 h-[50%] max-sm:h-[48px] rounded-md ${rundissable?"bg-[#1B6E31] cursor-not-allowed":"bg-[#28A745] hover:bg-[#218838]"}`} disabled={submitdissable}>{submitdissable?<svg xmlns="http://www.w3.org/2000/svg" viewBox="-350 20 1000 200"><circle fill="#00FF49" stroke="#00FF49" stroke-width="2" r="15" cx="40" cy="65"><animate attributeName="cy" calcMode="spline" dur="2" values="65;135;65;" keySplines=".5 0 .5 1;.5 0 .5 1" repeatCount="indefinite" begin="-.4"></animate></circle><circle fill="#00FF49" stroke="#00FF49" stroke-width="2" r="15" cx="100" cy="65"><animate attributeName="cy" calcMode="spline" dur="2" values="65;135;65;" keySplines=".5 0 .5 1;.5 0 .5 1" repeatCount="indefinite" begin="-.2"></animate></circle><circle fill="#00FF49" stroke="#00FF49" stroke-width="2" r="15" cx="160" cy="65"><animate attributeName="cy" calcMode="spline" dur="2" values="65;135;65;" keySplines=".5 0 .5 1;.5 0 .5 1" repeatCount="indefinite" begin="0"></animate></circle></svg>:"Submit"}</button>
               </div>
               <div className="grid grid-cols-2 md:grid-cols-4 w-full gap-4">
                 {languages.map((lang) => (
@@ -190,7 +229,7 @@ export default function Landuppage() {
                     className={`p-4 rounded-lg border-2
             ${
               selectedLanguage === lang.id
-                ? "border-red-500 bg-gray-800"
+                ? "border-red-500 bg-[#2A2A2A]"
                 : "border-gray-700"
             }
            hover:scale-105 transition-transform cursor-pointer`}
@@ -219,7 +258,7 @@ export default function Landuppage() {
                 name="name"
                 value={form.name}
                 onChange={handlechange}
-                className="bg-gray-900 h-12 rounded-lg  w-[100%] border-none outline-none p-5 text-white-100"
+                className="bg-[#2A2A2A] h-12 rounded-lg  w-[100%] border-none outline-none p-5 text-white-100"
                 placeholder="What's your good name?"
                 required
               />
@@ -255,10 +294,10 @@ export default function Landuppage() {
                   onChange={handlechange}
                   placeholder="Enter Standard Input"
                   rows={10}
-                  className="w-full p-2 bg-gray-900 text-white rounded-md resize-none"
+                  className="w-full p-2 bg-[#2A2A2A] text-white rounded-md resize-none"
                 ></textarea>
               ) : (
-                <div className="p-2 bg-gray-900 text-white rounded-md overflow-scroll min-h-[37.5vh] max-h-[37.5vh]">
+                <div className="p-2 bg-[#2A2A2A] text-white rounded-md overflow-scroll min-h-[37.5vh] max-h-[37.5vh]">
                   <h3 className="text-lg font-semibold mb-2 text-center">
                     Output
                   </h3>

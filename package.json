@@ -10,11 +10,15 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@codemirror/autocomplete": "^6.18.3",
+    "@codemirror/basic-setup": "^0.20.0",
+    "@codemirror/highlight": "^0.19.8",
     "@codemirror/lang-cpp": "^6.0.2",
     "@codemirror/lang-java": "^6.0.1",
     "@codemirror/lang-javascript": "^6.2.2",
     "@codemirror/lang-python": "^6.1.4",
     "@uiw/codemirror-theme-tokyo-night": "^4.21.24",
+    "@uiw/codemirror-themes": "^4.23.6",
     "@uiw/react-codemirror": "^4.21.24",
     "@upstash/redis": "^1.34.3",
     "axios": "^1.6.8",
