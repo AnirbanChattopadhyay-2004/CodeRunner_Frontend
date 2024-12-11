@@ -1,3 +1,5 @@
+import { Copy } from 'lucide-react';
+import { Forward } from 'lucide-react';
 
 export default function Row({id,username,stdinput,sourcecode,language,created,stdoutput,status}){
     function convertUTCToIST(utcDateString) {
@@ -53,10 +55,10 @@ export default function Row({id,username,stdinput,sourcecode,language,created,st
         </td>
         <td className="px-6 py-4 cursor-pointer hover:text-red-500 " onClick={()=>{ navigator.clipboard.writeText(sourcecode);
 }}>
-            Copy
+            <Copy/>
         </td>
-        <td className="px-6 py-4 cursor-pointer" onClick={()=>{navigator.clipboard.writeText("http://localhost:5173/page/"+id)}}>
-            Share
+        <td className="px-6 py-4 cursor-pointer hover:text-green-500" onClick={()=>{navigator.clipboard.writeText("http://localhost:5173/page/"+id)}}>
+            <Forward/>
         </td>
     </tr>
     )

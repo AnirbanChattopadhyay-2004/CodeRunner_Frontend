@@ -3,7 +3,10 @@ import axios from "axios"
 import Row from "./Row"
 import { useNavigate } from "react-router-dom"
 // import { Redis } from '@upstash/redis'
+import { MoveLeft } from 'lucide-react';
 import { Redis } from "https://esm.sh/@upstash/redis";
+import animationData from "../assets/loading_animation.json"
+import Lottie from "lottie-react";
 
 const client = new Redis({
     url: import.meta.env.VITE_reddisurl || "https://generous-eel-36876.upstash.io",
@@ -45,10 +48,10 @@ export default function Page2(){
         getData()
     },[])
     if(!details)
-        return <div>Loading...</div>
+        return <div className='flex justify-center items-center bg-tertiary h-screen text-white'><Lottie animationData={animationData} /></div>
     return (
         <div className="flex w-full flex-col justify-center gap-20 p-20 items-center  bg-hero-pattern min-h-[100vh]" >
-            <button type="button" onClick={()=>navigate("/")} className="focus:outline-none p-5 text-white bg-tertiary hover:bg-purple-800 focus:ring-4  font-medium rounded-lg text-sm px-5 py-2.5 mb-2 dark:bg-purple-600 dark:hover:bg-purple-700 ">Go Back</button>
+            <button type="button" onClick={()=>navigate("/")} className="flex gap-2 items-center focus:outline-none p-5 text-white  hover:bg-purple-800 focus:ring-4  font-medium rounded-lg text-sm px-5 py-2.5 mb-2 dark:bg-purple-600 dark:hover:bg-purple-700 "><MoveLeft/>Go Back</button>
 <div className=" relative flex overflow-x-auto shadow-md flex-1 rounded-sm sm:w-full h-auto ">
     <table className="w-full table-auto text-sm text-left rtl:text-right  text-gray-500 dark:text-gray-400">
         <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
@@ -75,10 +78,10 @@ export default function Page2(){
                     Output 
                 </th>
                 <th scope="col" className="px-6 py-3">
-                    Copy 
+                    
                 </th>
                 <th scope="col" className="px-6 py-3">
-                    Share 
+                     
                 </th>
             </tr>
         </thead>
