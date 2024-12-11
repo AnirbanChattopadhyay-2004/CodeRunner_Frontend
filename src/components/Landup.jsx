@@ -6,7 +6,6 @@ import animationData4 from "../assets/cpp.json"
 import animationData5 from "../assets/javascript.json"
 import { useState } from "react";
 import CodeMirror from "@uiw/react-codemirror";
-import { tokyoNight } from "@uiw/codemirror-theme-tokyo-night";
 import { javascript } from "@codemirror/lang-javascript";
 import { java } from "@codemirror/lang-java";
 import { python } from "@codemirror/lang-python";
@@ -18,6 +17,7 @@ import { HighlightStyle, tags } from "@codemirror/highlight";
 import { createTheme } from "@uiw/codemirror-themes";
 import { autocompletion,completeFromList } from "@codemirror/autocomplete";
 import {stringMethods ,mathMethods,collectionsMethods,javaKeywords,javaStandardLibrary} from "../assets/java"
+import { Play,CloudUpload,Handshake } from 'lucide-react';
 const leetCodeTheme = createTheme({
   theme: "dark",
   settings: {
@@ -196,7 +196,7 @@ export default function Landuppage() {
         </div>
         
       </div>
-      <div className="min-h-[100vh] bg-gradient-to-b from-[#000634] via-blue-950 to-black w-full flex items-center justify-center max-sm:flex-col">
+      <div className="min-h-[100vh] bg-[#0e0a21] w-full flex items-center justify-center max-sm:flex-col">
         
         <div className=" flex flex-1 p-5 gap-5 max-sm:flex-col ">
           <div className="w-3/5 max-sm:w-[90vw] max-sm:p-5">
@@ -219,8 +219,16 @@ export default function Landuppage() {
           <div className="flex flex-col flex-1 gap-5">
             <div className="flex flex-col justify-between  items-center flex-1 max-sm:gap-5">
               <div className="w-full flex gap-3 items-center flex-1 ">
-                <button type="button" onClick={()=>{setRundissable(true);handleSubmit("Run") }} className={` text-white font-semibold  flex-1 h-[50%] max-sm:h-[48px]  rounded-md ${rundissable?"bg-[#2A4A7B] cursor-not-allowed ":"bg-[#4A90E2] hover:bg-[#357ABD]"}` } disabled={rundissable}>{rundissable?<svg xmlns="http://www.w3.org/2000/svg" viewBox="-350 20 1000 200"><circle fill="#8DDEFF" stroke="#8DDEFF" stroke-width="2" r="15" cx="40" cy="65"><animate attributeName="cy" calcMode="spline" dur="2" values="65;135;65;" keySplines=".5 0 .5 1;.5 0 .5 1" repeatCount="indefinite" begin="-.4"></animate></circle><circle fill="#8DDEFF" stroke="#8DDEFF" stroke-width="2" r="15" cx="100" cy="65"><animate attributeName="cy" calcMode="spline" dur="2" values="65;135;65;" keySplines=".5 0 .5 1;.5 0 .5 1" repeatCount="indefinite" begin="-.2"></animate></circle><circle fill="#8DDEFF" stroke="#8DDEFF" stroke-width="2" r="15" cx="160" cy="65"><animate attributeName="cy" calcMode="spline" dur="2" values="65;135;65;" keySplines=".5 0 .5 1;.5 0 .5 1" repeatCount="indefinite" begin="0"></animate></circle></svg>:"Run"}</button>
-                <button type="button" onClick={()=>{setSubmitdissable(true); handleSubmit("Submit")}} className={` text-white font-semibold flex-1 h-[50%] max-sm:h-[48px] rounded-md ${rundissable?"bg-[#1B6E31] cursor-not-allowed":"bg-[#28A745] hover:bg-[#218838]"}`} disabled={submitdissable}>{submitdissable?<svg xmlns="http://www.w3.org/2000/svg" viewBox="-350 20 1000 200"><circle fill="#00FF49" stroke="#00FF49" stroke-width="2" r="15" cx="40" cy="65"><animate attributeName="cy" calcMode="spline" dur="2" values="65;135;65;" keySplines=".5 0 .5 1;.5 0 .5 1" repeatCount="indefinite" begin="-.4"></animate></circle><circle fill="#00FF49" stroke="#00FF49" stroke-width="2" r="15" cx="100" cy="65"><animate attributeName="cy" calcMode="spline" dur="2" values="65;135;65;" keySplines=".5 0 .5 1;.5 0 .5 1" repeatCount="indefinite" begin="-.2"></animate></circle><circle fill="#00FF49" stroke="#00FF49" stroke-width="2" r="15" cx="160" cy="65"><animate attributeName="cy" calcMode="spline" dur="2" values="65;135;65;" keySplines=".5 0 .5 1;.5 0 .5 1" repeatCount="indefinite" begin="0"></animate></circle></svg>:"Submit"}</button>
+                
+                <button type="button" onClick={()=>{setRundissable(true);handleSubmit("Run") }} className={` text-white font-semibold  flex-1 h-[50%] max-sm:h-[48px]  rounded-md ${rundissable?"bg-[#323232] cursor-not-allowed ":"bg-[#2A2A2A] hover:bg-[#323232]"}` } disabled={rundissable}>{rundissable?<svg xmlns="http://www.w3.org/2000/svg" viewBox="-350 20 1000 200"><circle fill="#8DDEFF" stroke="#8DDEFF" stroke-width="2" r="15" cx="40" cy="65"><animate attributeName="cy" calcMode="spline" dur="2" values="65;135;65;" keySplines=".5 0 .5 1;.5 0 .5 1" repeatCount="indefinite" begin="-.4"></animate></circle><circle fill="#8DDEFF" stroke="#8DDEFF" stroke-width="2" r="15" cx="100" cy="65"><animate attributeName="cy" calcMode="spline" dur="2" values="65;135;65;" keySplines=".5 0 .5 1;.5 0 .5 1" repeatCount="indefinite" begin="-.2"></animate></circle><circle fill="#8DDEFF" stroke="#8DDEFF" stroke-width="2" r="15" cx="160" cy="65"><animate attributeName="cy" calcMode="spline" dur="2" values="65;135;65;" keySplines=".5 0 .5 1;.5 0 .5 1" repeatCount="indefinite" begin="0"></animate></circle></svg>:(<div className="flex justify-center gap-1">
+                  <Play size={25}/> <p>Run</p>
+                  </div> )}</button>
+                <button type="button" onClick={()=>{setSubmitdissable(true); handleSubmit("Submit")}} className={` text-[#66ff00] font-semibold flex-1 h-[50%] max-sm:h-[48px] rounded-md ${rundissable?"bg-[#323232] cursor-not-allowed":"bg-[#2A2A2A] hover:bg-[#323232]"}`} disabled={submitdissable}>{submitdissable?<svg xmlns="http://www.w3.org/2000/svg" viewBox="-350 20 1000 200"><circle fill="#00FF49" stroke="#00FF49" stroke-width="2" r="15" cx="40" cy="65"><animate attributeName="cy" calcMode="spline" dur="2" values="65;135;65;" keySplines=".5 0 .5 1;.5 0 .5 1" repeatCount="indefinite" begin="-.4"></animate></circle><circle fill="#00FF49" stroke="#00FF49" stroke-width="2" r="15" cx="100" cy="65"><animate attributeName="cy" calcMode="spline" dur="2" values="65;135;65;" keySplines=".5 0 .5 1;.5 0 .5 1" repeatCount="indefinite" begin="-.2"></animate></circle><circle fill="#00FF49" stroke="#00FF49" stroke-width="2" r="15" cx="160" cy="65"><animate attributeName="cy" calcMode="spline" dur="2" values="65;135;65;" keySplines=".5 0 .5 1;.5 0 .5 1" repeatCount="indefinite" begin="0"></animate></circle></svg>:<div className="flex justify-center gap-1">
+                  <CloudUpload color="#66ff00" size={25}/> <p>Submit</p>
+                  </div>}</button>
+                <button type="button" onClick={()=>{navigate("/collab")}} className={` text-[#ff34f1] font-semibold flex-1 h-[50%] max-sm:h-[48px] rounded-md ${rundissable?"bg-[#323232] cursor-not-allowed":"bg-[#2A2A2A]  hover:bg-[#323232]"}`} disabled={submitdissable}>{submitdissable?<svg xmlns="http://www.w3.org/2000/svg" viewBox="-350 20 1000 200"><circle fill="#00FF49" stroke="#00FF49" stroke-width="2" r="15" cx="40" cy="65"><animate attributeName="cy" calcMode="spline" dur="2" values="65;135;65;" keySplines=".5 0 .5 1;.5 0 .5 1" repeatCount="indefinite" begin="-.4"></animate></circle><circle fill="#00FF49" stroke="#00FF49" stroke-width="2" r="15" cx="100" cy="65"><animate attributeName="cy" calcMode="spline" dur="2" values="65;135;65;" keySplines=".5 0 .5 1;.5 0 .5 1" repeatCount="indefinite" begin="-.2"></animate></circle><circle fill="#00FF49" stroke="#00FF49" stroke-width="2" r="15" cx="160" cy="65"><animate attributeName="cy" calcMode="spline" dur="2" values="65;135;65;" keySplines=".5 0 .5 1;.5 0 .5 1" repeatCount="indefinite" begin="0"></animate></circle></svg>:<div className="flex justify-center gap-1">
+                  <Handshake color="#ff34f1" size={25}/> <p>Collab</p>
+                  </div>}</button>
               </div>
               <div className="grid grid-cols-2 md:grid-cols-4 w-full gap-4">
                 {languages.map((lang) => (

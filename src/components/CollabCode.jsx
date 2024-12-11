@@ -9,6 +9,82 @@ import { useEffect } from "react";
 import axios from "axios";
 import { useParams } from "react-router-dom";
 import { io, Socket } from "socket.io-client";
+import { HighlightStyle, tags } from "@codemirror/highlight";
+import { createTheme } from "@uiw/codemirror-themes";
+import { autocompletion, completeFromList } from "@codemirror/autocomplete";
+import { useNavigate } from "react-router-dom";
+import {
+  stringMethods,
+  mathMethods,
+  collectionsMethods,
+  javaKeywords,
+  javaStandardLibrary,
+} from "../assets/java";
+import { Play, CloudUpload, Handshake } from "lucide-react";
+const leetCodeTheme = createTheme({
+  theme: "dark",
+  settings: {
+    background: "#1e1e1e", // LeetCode-like dark background
+    foreground: "#f5f5f5", // Light foreground
+    caret: "#ffcc00", // Yellow caret
+    selection: "#4a4a4a", // Darker selection
+    gutterBackground: "#1e1e1e", // Match the editor background
+    gutterForeground: "#7d8590", // Subtle gutter text
+    lineHighlight: "#2A2A2A",
+  },
+  styles: [
+    { tag: tags.keyword, color: "#c792ea" }, // Purple for keywords
+    { tag: tags.comment, color: "#355E3B" }, // Green for comments
+    { tag: tags.string, color: "#ecc48d" }, // Light yellow for strings
+    { tag: tags.variableName, color: "#82aaff" }, // Blue for variables
+    { tag: tags.function, color: "#addb67" }, // Green for functions
+  ],
+});
+const javaMethods = {
+  String: stringMethods,
+  Math: mathMethods,
+  Collections: collectionsMethods,
+  // Add similar entries for other classes
+};
+
+const javaCompletions = (context) => {
+  const word = context.matchBefore(/\w*/);
+  if (!word || (word.from === word.to && !context.explicit)) return null;
+
+  // Combine all suggestions
+  const options = [
+    ...javaKeywords.map((keyword) => ({ label: keyword, type: "keyword" })),
+    ...javaStandardLibrary.map((lib) => ({ label: lib, type: "class" })),
+    ...(javaMethods[word.text]?.map((method) => ({
+      label: method,
+      type: "method",
+    })) || []),
+  ];
+
+  return {
+    from: word.from,
+    options,
+  };
+};
+const customCompletions = {
+  javascript: completeFromList([
+    { label: "console.log", type: "function", detail: "Log output to console" },
+    { label: "function", type: "keyword" },
+    { label: "const", type: "keyword" },
+    { label: "let", type: "keyword" },
+  ]),
+  python: completeFromList([
+    { label: "print", type: "function", detail: "Output to console" },
+    { label: "def", type: "keyword" },
+    { label: "import", type: "keyword" },
+  ]),
+  cpp: completeFromList([
+    { label: "std::cout", type: "function", detail: "Print to console" },
+    { label: "int", type: "keyword" },
+    { label: "return", type: "keyword" },
+  ]),
+  java: javaCompletions,
+};
 
 const languageExtensions = {
   javascript: javascript,
@@ -17,52 +93,57 @@ const languageExtensions = {
   cpp: cpp,
 };
 export default function CollabCode() {
-    const [socket, setSocket] = useState(null);
-    const [code, setCode] = useState();
-    const  param = useParams()
-    const room = param.room
-    useEffect(() => {
-        const newSocket = io("http://localhost:3001");
-        setSocket(newSocket);
-       // Cleanup function to disconnect socket on component unmount
-        return () => {
-          newSocket.disconnect();
-        };
-        
-      }, []);
-       useEffect(() => {
-        if (socket) {
-          socket.on("connect", () => {
-            console.log(socket.id); // x8WIv7-mJelg7on_ALbx
-          });
-          socket.emit("join room",room)
-          socket.on("receive code", (data) => {     
-             console.log(data); 
-            setCode(data);
-          });
-        }
-        return ()=>{
-          socket?.removeAllListeners()
-        }
-      }, [socket]);
-    
+  const [socket, setSocket] = useState(null);
+  const [code, setCode] = useState();
+  const url =
+  import.meta.env.VITE_backendurl ||
+  "https://coderunner-backend-1xek.onrender.com";
+  const navigate = useNavigate();
+  const param = useParams();
+  const room = param.room;
+  useEffect(() => {
+    const newSocket = io("http://localhost:3001");
+    setSocket(newSocket);
+    // Cleanup function to disconnect socket on component unmount
+    return () => {
+      newSocket.disconnect();
+    };
+  }, []);
+  useEffect(() => {
+    if (socket) {
+      socket.on("connect", () => {
+        console.log(socket.id); // x8WIv7-mJelg7on_ALbx
+      });
+      socket.emit("join room", room);
+      socket.on("receive code", (data) => {
+        console.log(data);
+        setCode(data);
+      });
+    }
+    return () => {
+      socket?.removeAllListeners();
+    };
+  }, [socket]);
+
   const [form, setForm] = useState({
     name: "",
     language: "javascript",
     stdin: "",
   });
-  const [rundissable,setRundissable ] = useState(false);
-  const [output,setOutput]=useState("")
+  const [rundissable, setRundissable] = useState(false);
+  const [submitdissable,setSubmitdissable ] = useState(false);
+  
+  const [output, setOutput] = useState("");
   const [selectedLanguage, setSelectedLanguage] = useState();
   const [activeTab, setActiveTab] = useState("input");
-  async function handleSubmit() {
+  async function handleSubmit(buttontype) {
     // e.preventDefault();
     
     let id = 62;
     if (form.language == "javascript") id = 63;
-    else if (form.language == "python") id = 71;          
+    else if (form.language == "python") id = 71;
     else if (form.language == "cpp") id = 54;
-    console.log(value)
+    // console.log(value)
     const options = {
       method: "POST",
       url: import.meta.env.VITE_rapidAPIURL,
@@ -78,7 +159,7 @@ export default function CollabCode() {
       },
       data: {
         language_id: id,
-        source_code: btoa(value),
+        source_code: btoa(code),
         stdin: btoa(form.stdin)
       },
     };
@@ -86,23 +167,34 @@ export default function CollabCode() {
     try {
       const response = await axios.request(options);
       console.log(response.data);
+      if(buttontype=="Submit"){
+
+        const res = await axios.post(url + "/codes/add", {
+          ...form,
+          code: code,
+          stdout: atob(response.data.stdout) || atob(response.data.message),
+          status: response.data.status.description,
+        });
+        setSubmitdissable(false)
+        navigate("/page");
+      } else {
         if(response.data.stdout)
         setOutput(atob(response.data.stdout))
         else
         setOutput(atob(response.data.message))
       setRundissable(false)
       }
-     catch (error) {
+    } catch (error) {
       console.error(error);
     }
   }
   const onChange = (val) => {
-      if(socket){
-        setCode(val)
-        socket.emit("collab code",{
-            room:room,
-            code:val
-        })
+    if (socket) {
+      setCode(val);
+      socket.emit("collab code", {
+        room: room,
+        code: val,
+      });
     }
   };
 
@@ -120,7 +212,7 @@ export default function CollabCode() {
     setForm({ ...form, [name]: value });
   }
   return (
-    <div className="w-full bg-hero-pattern bg-cover ">
+    <div className="w-full bg-tertiary bg-cover ">
       <div className="min-h-[100vh] w-full flex items-center justify-center max-sm:flex-col">
         <div className=" flex flex-1 p-5 gap-5 max-sm:flex-col ">
           <div className="w-3/5 max-sm:w-[90vw] max-sm:p-5">
@@ -128,18 +220,31 @@ export default function CollabCode() {
               value={code}
               height="90vh"
               width="100%"
-              theme={tokyoNight}
-              extensions={[languageExtensions[form.language]()]}
+              theme={leetCodeTheme}
+              extensions={[
+                form.language == "java"
+                  ? java()
+                  : languageExtensions[form.language](),
+
+                autocompletion({
+                  override: [customCompletions[form.language]],
+                }),
+              ]}
               onChange={onChange}
-              style={{fontSize:"18px"}}
+              style={{ fontSize: "18px" }}
               maxWidth="80vw"
             />
           </div>
           <div className="flex flex-col flex-1 gap-5">
             <div className="flex flex-col justify-between  items-center flex-1 max-sm:gap-5">
               <div className="w-full flex gap-3 items-center flex-1 ">
-                <button type="button" onClick={()=>{setRundissable(true);handleSubmit() }} className={`bg-blue-500 text-white font-semibold  flex-1 h-[50%] max-sm:h-[48px]  rounded-md ${rundissable?"bg-blue-700 ":""}` } disabled={rundissable}>{rundissable?<svg xmlns="http://www.w3.org/2000/svg" viewBox="-350 20 1000 200"><circle fill="#8DDEFF" stroke="#8DDEFF" stroke-width="2" r="15" cx="40" cy="65"><animate attributeName="cy" calcMode="spline" dur="2" values="65;135;65;" keySplines=".5 0 .5 1;.5 0 .5 1" repeatCount="indefinite" begin="-.4"></animate></circle><circle fill="#8DDEFF" stroke="#8DDEFF" stroke-width="2" r="15" cx="100" cy="65"><animate attributeName="cy" calcMode="spline" dur="2" values="65;135;65;" keySplines=".5 0 .5 1;.5 0 .5 1" repeatCount="indefinite" begin="-.2"></animate></circle><circle fill="#8DDEFF" stroke="#8DDEFF" stroke-width="2" r="15" cx="160" cy="65"><animate attributeName="cy" calcMode="spline" dur="2" values="65;135;65;" keySplines=".5 0 .5 1;.5 0 .5 1" repeatCount="indefinite" begin="0"></animate></circle></svg>:"Run"}</button>
-            </div>
+              <button type="button" onClick={()=>{setRundissable(true);handleSubmit("Run") }} className={` text-white font-semibold  flex-1 h-[50%] max-sm:h-[48px]  rounded-md ${rundissable?"bg-[#323232] cursor-not-allowed ":"bg-[#2A2A2A] hover:bg-[#323232]"}` } disabled={rundissable}>{rundissable?<svg xmlns="http://www.w3.org/2000/svg" viewBox="-350 20 1000 200"><circle fill="#8DDEFF" stroke="#8DDEFF" stroke-width="2" r="15" cx="40" cy="65"><animate attributeName="cy" calcMode="spline" dur="2" values="65;135;65;" keySplines=".5 0 .5 1;.5 0 .5 1" repeatCount="indefinite" begin="-.4"></animate></circle><circle fill="#8DDEFF" stroke="#8DDEFF" stroke-width="2" r="15" cx="100" cy="65"><animate attributeName="cy" calcMode="spline" dur="2" values="65;135;65;" keySplines=".5 0 .5 1;.5 0 .5 1" repeatCount="indefinite" begin="-.2"></animate></circle><circle fill="#8DDEFF" stroke="#8DDEFF" stroke-width="2" r="15" cx="160" cy="65"><animate attributeName="cy" calcMode="spline" dur="2" values="65;135;65;" keySplines=".5 0 .5 1;.5 0 .5 1" repeatCount="indefinite" begin="0"></animate></circle></svg>:(<div className="flex justify-center gap-1">
+                  <Play size={25}/> <p>Run</p>
+                  </div> )}</button>
+                <button type="button" onClick={()=>{setSubmitdissable(true); handleSubmit("Submit")}} className={` text-[#66ff00] font-semibold flex-1 h-[50%] max-sm:h-[48px] rounded-md ${rundissable?"bg-[#323232] cursor-not-allowed":"bg-[#2A2A2A] hover:bg-[#323232]"}`} disabled={submitdissable}>{submitdissable?<svg xmlns="http://www.w3.org/2000/svg" viewBox="-350 20 1000 200"><circle fill="#00FF49" stroke="#00FF49" stroke-width="2" r="15" cx="40" cy="65"><animate attributeName="cy" calcMode="spline" dur="2" values="65;135;65;" keySplines=".5 0 .5 1;.5 0 .5 1" repeatCount="indefinite" begin="-.4"></animate></circle><circle fill="#00FF49" stroke="#00FF49" stroke-width="2" r="15" cx="100" cy="65"><animate attributeName="cy" calcMode="spline" dur="2" values="65;135;65;" keySplines=".5 0 .5 1;.5 0 .5 1" repeatCount="indefinite" begin="-.2"></animate></circle><circle fill="#00FF49" stroke="#00FF49" stroke-width="2" r="15" cx="160" cy="65"><animate attributeName="cy" calcMode="spline" dur="2" values="65;135;65;" keySplines=".5 0 .5 1;.5 0 .5 1" repeatCount="indefinite" begin="0"></animate></circle></svg>:<div className="flex justify-center gap-1">
+                  <CloudUpload color="#66ff00" size={25}/> <p>Submit</p>
+                  </div>}</button>
+              </div>
               <div className="grid grid-cols-2 md:grid-cols-4 w-full gap-4">
                 {languages.map((lang) => (
                   <div
@@ -147,13 +252,13 @@ export default function CollabCode() {
                     className={`p-4 rounded-lg border-2
             ${
               selectedLanguage === lang.id
-                ? "border-red-500 bg-gray-800"
+                ? "border-red-500 bg-[#2A2A2A]"
                 : "border-gray-700"
             }
            hover:scale-105 transition-transform cursor-pointer`}
                     onClick={() => {
-                      if(lang.id == 'java')
-                        alert("please use Main as the class name")
+                      if (lang.id == "java")
+                        alert("please use Main as the class name");
                       setSelectedLanguage(lang.id);
                       setForm((prev) => {
                         return { ...prev, language: lang.id };
@@ -176,7 +281,7 @@ export default function CollabCode() {
                 name="name"
                 value={form.name}
                 onChange={handlechange}
-                className="bg-gray-900 h-12 rounded-lg  w-[100%] border-none outline-none p-5 text-white-100"
+                className="bg-[#2A2A2A] h-12 rounded-lg  w-[100%] border-none outline-none p-5 text-white-100"
                 placeholder="What's your good name?"
                 required
               />
@@ -212,14 +317,16 @@ export default function CollabCode() {
                   onChange={handlechange}
                   placeholder="Enter Standard Input"
                   rows={10}
-                  className="w-full p-2 bg-gray-900 text-white rounded-md resize-none"
+                  className="w-full p-2 bg-[#2A2A2A] text-white rounded-md resize-none"
                 ></textarea>
               ) : (
-                <div className="p-2 bg-gray-900 text-white rounded-md overflow-scroll min-h-[37.5vh] max-h-[37.5vh]">
+                <div className="p-2 bg-[#2A2A2A] text-white rounded-md overflow-scroll min-h-[37.5vh] max-h-[37.5vh]">
                   <h3 className="text-lg font-semibold mb-2 text-center">
                     Output
                   </h3>
-                  <pre className="whitespace-pre-wrap break-words">{output}</pre>
+                  <pre className="whitespace-pre-wrap break-words">
+                    {output}
+                  </pre>
                 </div>
               )}
             </div>
