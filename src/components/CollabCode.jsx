@@ -8,19 +8,11 @@ import { cpp } from "@codemirror/lang-cpp";
 import { useEffect } from "react";
 import axios from "axios";
 import { useParams } from "react-router-dom";
-import { io, Socket } from "socket.io-client";
-import { HighlightStyle, tags } from "@codemirror/highlight";
+import { io } from "socket.io-client";
+import { tags } from "@codemirror/highlight";
 import { createTheme } from "@uiw/codemirror-themes";
-import { autocompletion, completeFromList } from "@codemirror/autocomplete";
 import { useNavigate } from "react-router-dom";
-import {
-  stringMethods,
-  mathMethods,
-  collectionsMethods,
-  javaKeywords,
-  javaStandardLibrary,
-} from "../assets/java";
-import { Play, CloudUpload, Handshake } from "lucide-react";
+import { Play, CloudUpload } from "lucide-react";
 const leetCodeTheme = createTheme({
   theme: "dark",
   settings: {
@@ -40,51 +32,6 @@ const leetCodeTheme = createTheme({
     { tag: tags.function, color: "#addb67" }, // Green for functions
   ],
 });
-const javaMethods = {
-  String: stringMethods,
-  Math: mathMethods,
-  Collections: collectionsMethods,
-  // Add similar entries for other classes
-};
-
-const javaCompletions = (context) => {
-  const word = context.matchBefore(/\w*/);
-  if (!word || (word.from === word.to && !context.explicit)) return null;
-
-  // Combine all suggestions
-  const options = [
-    ...javaKeywords.map((keyword) => ({ label: keyword, type: "keyword" })),
-    ...javaStandardLibrary.map((lib) => ({ label: lib, type: "class" })),
-    ...(javaMethods[word.text]?.map((method) => ({
-      label: method,
-      type: "method",
-    })) || []),
-  ];
-
-  return {
-    from: word.from,
-    options,
-  };
-};
-const customCompletions = {
-  javascript: completeFromList([
-    { label: "console.log", type: "function", detail: "Log output to console" },
-    { label: "function", type: "keyword" },
-    { label: "const", type: "keyword" },
-    { label: "let", type: "keyword" },
-  ]),
-  python: completeFromList([
-    { label: "print", type: "function", detail: "Output to console" },
-    { label: "def", type: "keyword" },
-    { label: "import", type: "keyword" },
-  ]),
-  cpp: completeFromList([
-    { label: "std::cout", type: "function", detail: "Print to console" },
-    { label: "int", type: "keyword" },
-    { label: "return", type: "keyword" },
-  ]),
-  java: javaCompletions,
-};
 
 const languageExtensions = {
   javascript: javascript,
@@ -96,13 +43,13 @@ export default function CollabCode() {
   const [socket, setSocket] = useState(null);
   const [code, setCode] = useState();
   const url =
-  import.meta.env.VITE_backendurl ||
-  "https://coderunner-backend-1xek.onrender.com";
+    import.meta.env.VITE_backendurl ||
+    "http://localhost:3000";
   const navigate = useNavigate();
   const param = useParams();
   const room = param.room;
   useEffect(() => {
-    const newSocket = io("http://localhost:3001");
+    const newSocket = io("https://coderunnerwebsocket-backend.onrender.com");
     setSocket(newSocket);
     // Cleanup function to disconnect socket on component unmount
     return () => {
@@ -131,14 +78,14 @@ export default function CollabCode() {
     stdin: "",
   });
   const [rundissable, setRundissable] = useState(false);
-  const [submitdissable,setSubmitdissable ] = useState(false);
-  
+  const [submitdissable, setSubmitdissable] = useState(false);
+
   const [output, setOutput] = useState("");
   const [selectedLanguage, setSelectedLanguage] = useState();
   const [activeTab, setActiveTab] = useState("input");
   async function handleSubmit(buttontype) {
     // e.preventDefault();
-    
+
     let id = 62;
     if (form.language == "javascript") id = 63;
     else if (form.language == "python") id = 71;
@@ -149,40 +96,37 @@ export default function CollabCode() {
       url: import.meta.env.VITE_rapidAPIURL,
       params: {
         base64_encoded: "true",
-        
+
         wait: "true",
       },
       headers: {
-        'Content-Type': 'application/json',
-        'x-rapidapi-key': import.meta.env.VITE_rapidAPIKey,
-        'x-rapidapi-host': import.meta.env.VITE_host,      
+        "Content-Type": "application/json",
+        "x-rapidapi-key": import.meta.env.VITE_rapidAPIKey,
+        "x-rapidapi-host": import.meta.env.VITE_host,
       },
       data: {
         language_id: id,
         source_code: btoa(code),
-        stdin: btoa(form.stdin)
+        stdin: btoa(form.stdin),
       },
     };
 
     try {
       const response = await axios.request(options);
       console.log(response.data);
-      if(buttontype=="Submit"){
-
+      if (buttontype == "Submit") {
         const res = await axios.post(url + "/codes/add", {
           ...form,
           code: code,
           stdout: atob(response.data.stdout) || atob(response.data.message),
           status: response.data.status.description,
         });
-        setSubmitdissable(false)
+        setSubmitdissable(false);
         navigate("/page");
       } else {
-        if(response.data.stdout)
-        setOutput(atob(response.data.stdout))
-        else
-        setOutput(atob(response.data.message))
-      setRundissable(false)
+        if (response.data.stdout) setOutput(atob(response.data.stdout));
+        else setOutput(atob(response.data.message));
+        setRundissable(false);
       }
     } catch (error) {
       console.error(error);
@@ -225,10 +169,6 @@ export default function CollabCode() {
                 form.language == "java"
                   ? java()
                   : languageExtensions[form.language](),
-
-                autocompletion({
-                  override: [customCompletions[form.language]],
-                }),
               ]}
               onChange={onChange}
               style={{ fontSize: "18px" }}
@@ -237,13 +177,165 @@ export default function CollabCode() {
           </div>
           <div className="flex flex-col flex-1 gap-5">
             <div className="flex flex-col justify-between  items-center flex-1 max-sm:gap-5">
-              <div className="w-full flex gap-3 items-center flex-1 ">
-              <button type="button" onClick={()=>{setRundissable(true);handleSubmit("Run") }} className={` text-white font-semibold  flex-1 h-[50%] max-sm:h-[48px]  rounded-md ${rundissable?"bg-[#323232] cursor-not-allowed ":"bg-[#2A2A2A] hover:bg-[#323232]"}` } disabled={rundissable}>{rundissable?<svg xmlns="http://www.w3.org/2000/svg" viewBox="-350 20 1000 200"><circle fill="#8DDEFF" stroke="#8DDEFF" stroke-width="2" r="15" cx="40" cy="65"><animate attributeName="cy" calcMode="spline" dur="2" values="65;135;65;" keySplines=".5 0 .5 1;.5 0 .5 1" repeatCount="indefinite" begin="-.4"></animate></circle><circle fill="#8DDEFF" stroke="#8DDEFF" stroke-width="2" r="15" cx="100" cy="65"><animate attributeName="cy" calcMode="spline" dur="2" values="65;135;65;" keySplines=".5 0 .5 1;.5 0 .5 1" repeatCount="indefinite" begin="-.2"></animate></circle><circle fill="#8DDEFF" stroke="#8DDEFF" stroke-width="2" r="15" cx="160" cy="65"><animate attributeName="cy" calcMode="spline" dur="2" values="65;135;65;" keySplines=".5 0 .5 1;.5 0 .5 1" repeatCount="indefinite" begin="0"></animate></circle></svg>:(<div className="flex justify-center gap-1">
-                  <Play size={25}/> <p>Run</p>
-                  </div> )}</button>
-                <button type="button" onClick={()=>{setSubmitdissable(true); handleSubmit("Submit")}} className={` text-[#66ff00] font-semibold flex-1 h-[50%] max-sm:h-[48px] rounded-md ${rundissable?"bg-[#323232] cursor-not-allowed":"bg-[#2A2A2A] hover:bg-[#323232]"}`} disabled={submitdissable}>{submitdissable?<svg xmlns="http://www.w3.org/2000/svg" viewBox="-350 20 1000 200"><circle fill="#00FF49" stroke="#00FF49" stroke-width="2" r="15" cx="40" cy="65"><animate attributeName="cy" calcMode="spline" dur="2" values="65;135;65;" keySplines=".5 0 .5 1;.5 0 .5 1" repeatCount="indefinite" begin="-.4"></animate></circle><circle fill="#00FF49" stroke="#00FF49" stroke-width="2" r="15" cx="100" cy="65"><animate attributeName="cy" calcMode="spline" dur="2" values="65;135;65;" keySplines=".5 0 .5 1;.5 0 .5 1" repeatCount="indefinite" begin="-.2"></animate></circle><circle fill="#00FF49" stroke="#00FF49" stroke-width="2" r="15" cx="160" cy="65"><animate attributeName="cy" calcMode="spline" dur="2" values="65;135;65;" keySplines=".5 0 .5 1;.5 0 .5 1" repeatCount="indefinite" begin="0"></animate></circle></svg>:<div className="flex justify-center gap-1">
-                  <CloudUpload color="#66ff00" size={25}/> <p>Submit</p>
-                  </div>}</button>
+              <div className="w-full flex gap-3  flex-1 ">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setRundissable(true);
+                    handleSubmit("Run");
+                  }}
+                  className={` text-white font-semibold  flex-1 h-[60%] max-sm:h-[48px]  rounded-md ${
+                    rundissable
+                      ? "bg-[#323232] cursor-not-allowed "
+                      : "bg-[#2A2A2A] hover:bg-[#323232]"
+                  }`}
+                  disabled={rundissable}
+                >
+                  {rundissable ? (
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="-350 20 1000 200"
+                    >
+                      <circle
+                        fill="#8DDEFF"
+                        stroke="#8DDEFF"
+                        stroke-width="2"
+                        r="15"
+                        cx="40"
+                        cy="65"
+                      >
+                        <animate
+                          attributeName="cy"
+                          calcMode="spline"
+                          dur="2"
+                          values="65;135;65;"
+                          keySplines=".5 0 .5 1;.5 0 .5 1"
+                          repeatCount="indefinite"
+                          begin="-.4"
+                        ></animate>
+                      </circle>
+                      <circle
+                        fill="#8DDEFF"
+                        stroke="#8DDEFF"
+                        stroke-width="2"
+                        r="15"
+                        cx="100"
+                        cy="65"
+                      >
+                        <animate
+                          attributeName="cy"
+                          calcMode="spline"
+                          dur="2"
+                          values="65;135;65;"
+                          keySplines=".5 0 .5 1;.5 0 .5 1"
+                          repeatCount="indefinite"
+                          begin="-.2"
+                        ></animate>
+                      </circle>
+                      <circle
+                        fill="#8DDEFF"
+                        stroke="#8DDEFF"
+                        stroke-width="2"
+                        r="15"
+                        cx="160"
+                        cy="65"
+                      >
+                        <animate
+                          attributeName="cy"
+                          calcMode="spline"
+                          dur="2"
+                          values="65;135;65;"
+                          keySplines=".5 0 .5 1;.5 0 .5 1"
+                          repeatCount="indefinite"
+                          begin="0"
+                        ></animate>
+                      </circle>
+                    </svg>
+                  ) : (
+                    <div className="flex justify-center gap-1">
+                      <Play size={25} /> <p>Run</p>
+                    </div>
+                  )}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSubmitdissable(true);
+                    handleSubmit("Submit");
+                  }}
+                  className={` text-[#66ff00] font-semibold flex-1 h-[60%] max-sm:h-[48px] rounded-md ${
+                    rundissable
+                      ? "bg-[#323232] cursor-not-allowed"
+                      : "bg-[#2A2A2A] hover:bg-[#323232]"
+                  }`}
+                  disabled={submitdissable}
+                >
+                  {submitdissable ? (
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="-350 20 1000 200"
+                    >
+                      <circle
+                        fill="#00FF49"
+                        stroke="#00FF49"
+                        stroke-width="2"
+                        r="15"
+                        cx="40"
+                        cy="65"
+                      >
+                        <animate
+                          attributeName="cy"
+                          calcMode="spline"
+                          dur="2"
+                          values="65;135;65;"
+                          keySplines=".5 0 .5 1;.5 0 .5 1"
+                          repeatCount="indefinite"
+                          begin="-.4"
+                        ></animate>
+                      </circle>
+                      <circle
+                        fill="#00FF49"
+                        stroke="#00FF49"
+                        stroke-width="2"
+                        r="15"
+                        cx="100"
+                        cy="65"
+                      >
+                        <animate
+                          attributeName="cy"
+                          calcMode="spline"
+                          dur="2"
+                          values="65;135;65;"
+                          keySplines=".5 0 .5 1;.5 0 .5 1"
+                          repeatCount="indefinite"
+                          begin="-.2"
+                        ></animate>
+                      </circle>
+                      <circle
+                        fill="#00FF49"
+                        stroke="#00FF49"
+                        stroke-width="2"
+                        r="15"
+                        cx="160"
+                        cy="65"
+                      >
+                        <animate
+                          attributeName="cy"
+                          calcMode="spline"
+                          dur="2"
+                          values="65;135;65;"
+                          keySplines=".5 0 .5 1;.5 0 .5 1"
+                          repeatCount="indefinite"
+                          begin="0"
+                        ></animate>
+                      </circle>
+                    </svg>
+                  ) : (
+                    <div className="flex justify-center gap-1">
+                      <CloudUpload color="#66ff00" size={25} /> <p>Submit</p>
+                    </div>
+                  )}
+                </button>
               </div>
               <div className="grid grid-cols-2 md:grid-cols-4 w-full gap-4">
                 {languages.map((lang) => (

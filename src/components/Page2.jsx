@@ -13,7 +13,7 @@ const client = new Redis({
     token: import.meta.env.VITE_reddistoken || "AZAMAAIjcDFkMTY1M2M2MzYyNDk0ZDJmYWI0NDZiMGMzNjc0NDgwYXAxMA",
 })
 export default function Page2(){
-    const url=import.meta.env.VITE_backendurl || "https://coderunner-backend-1xek.onrender.com"
+    const url=import.meta.env.VITE_backendurl || "http://localhost:3000"
       const navigate = useNavigate()
     
     const [details,setDetails]=useState([])

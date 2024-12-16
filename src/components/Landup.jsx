@@ -1,9 +1,9 @@
 import Lottie from "lottie-react";
-import animationData from "../assets/animation2.json"
-import animationData2 from "../assets/java.json"
-import animationData3 from "../assets/python.json"
-import animationData4 from "../assets/cpp.json"
-import animationData5 from "../assets/javascript.json"
+import animationData from "../assets/animation2.json";
+import animationData2 from "../assets/java.json";
+import animationData3 from "../assets/python.json";
+import animationData4 from "../assets/cpp.json";
+import animationData5 from "../assets/javascript.json";
 import { useState } from "react";
 import CodeMirror from "@uiw/react-codemirror";
 import { javascript } from "@codemirror/lang-javascript";
@@ -12,29 +12,34 @@ import { python } from "@codemirror/lang-python";
 import { cpp } from "@codemirror/lang-cpp";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import { EditorView, basicSetup } from "@codemirror/basic-setup";
-import { HighlightStyle, tags } from "@codemirror/highlight";
+import { tags } from "@codemirror/highlight";
 import { createTheme } from "@uiw/codemirror-themes";
-import { autocompletion,completeFromList } from "@codemirror/autocomplete";
-import {stringMethods ,mathMethods,collectionsMethods,javaKeywords,javaStandardLibrary} from "../assets/java"
-import { Play,CloudUpload,Handshake } from 'lucide-react';
+import { autocompletion, completeFromList } from "@codemirror/autocomplete";
+import {
+  stringMethods,
+  mathMethods,
+  collectionsMethods,
+  javaKeywords,
+  javaStandardLibrary,
+} from "../assets/java";
+import { Play, CloudUpload, Handshake } from "lucide-react";
 const leetCodeTheme = createTheme({
   theme: "dark",
   settings: {
     background: "#1e1e1e", // LeetCode-like dark background
     foreground: "#f5f5f5", // Light foreground
-    caret: "#ffcc00",      // Yellow caret
-    selection: "#4a4a4a",  // Darker selection
+    caret: "#ffcc00", // Yellow caret
+    selection: "#4a4a4a", // Darker selection
     gutterBackground: "#1e1e1e", // Match the editor background
     gutterForeground: "#7d8590", // Subtle gutter text
-    lineHighlight:"#2A2A2A"
+    lineHighlight: "#2A2A2A",
   },
   styles: [
-    { tag: tags.keyword, color: "#c792ea" },       // Purple for keywords
-    { tag: tags.comment, color: "#355E3B" },       // Green for comments
-    { tag: tags.string, color: "#ecc48d" },        // Light yellow for strings
+    { tag: tags.keyword, color: "#c792ea" }, // Purple for keywords
+    { tag: tags.comment, color: "#355E3B" }, // Green for comments
+    { tag: tags.string, color: "#ecc48d" }, // Light yellow for strings
     { tag: tags.variableName, color: "#82aaff" }, // Blue for variables
-    { tag: tags.function, color: "#addb67" },     // Green for functions
+    { tag: tags.function, color: "#addb67" }, // Green for functions
   ],
 });
 const javaMethods = {
@@ -47,12 +52,15 @@ const javaMethods = {
 const javaCompletions = (context) => {
   const word = context.matchBefore(/\w*/);
   if (!word || (word.from === word.to && !context.explicit)) return null;
-  
+
   // Combine all suggestions
   const options = [
-    ...javaKeywords.map(keyword => ({ label: keyword, type: "keyword" })),
-    ...javaStandardLibrary.map(lib => ({ label: lib, type: "class" })),
-    ...(javaMethods[word.text]?.map(method => ({ label: method, type: "method" })) || []),
+    ...javaKeywords.map((keyword) => ({ label: keyword, type: "keyword" })),
+    ...javaStandardLibrary.map((lib) => ({ label: lib, type: "class" })),
+    ...(javaMethods[word.text]?.map((method) => ({
+      label: method,
+      type: "method",
+    })) || []),
   ];
 
   return {
@@ -77,7 +85,7 @@ const customCompletions = {
     { label: "int", type: "keyword" },
     { label: "return", type: "keyword" },
   ]),
-  java: javaCompletions
+  java: javaCompletions,
 };
 
 const languageExtensions = {
@@ -89,65 +97,62 @@ const languageExtensions = {
 export default function Landuppage() {
   const url =
     import.meta.env.VITE_backendurl ||
-    "https://coderunner-backend-1xek.onrender.com";
-    const navigate = useNavigate();
+    "http://localhost:3000";
+  const navigate = useNavigate();
   const [form, setForm] = useState({
     name: "",
     language: "javascript",
     stdin: "",
   });
-  const [rundissable,setRundissable ] = useState(false);
-  const [submitdissable,setSubmitdissable ] = useState(false);
-  const [output,setOutput]=useState("")
+  const [rundissable, setRundissable] = useState(false);
+  const [submitdissable, setSubmitdissable] = useState(false);
+  const [output, setOutput] = useState("");
   const [selectedLanguage, setSelectedLanguage] = useState();
   const [activeTab, setActiveTab] = useState("input");
   async function handleSubmit(buttontype) {
     // e.preventDefault();
-    
+
     let id = 62;
     if (form.language == "javascript") id = 63;
     else if (form.language == "python") id = 71;
     else if (form.language == "cpp") id = 54;
-    console.log(value)
+    console.log(value);
     const options = {
       method: "POST",
       url: import.meta.env.VITE_rapidAPIURL,
       params: {
         base64_encoded: "true",
-        
+
         wait: "true",
       },
       headers: {
-        'Content-Type': 'application/json',
-        'x-rapidapi-key': import.meta.env.VITE_rapidAPIKey,
-        'x-rapidapi-host': import.meta.env.VITE_host,      
+        "Content-Type": "application/json",
+        "x-rapidapi-key": import.meta.env.VITE_rapidAPIKey,
+        "x-rapidapi-host": import.meta.env.VITE_host,
       },
       data: {
         language_id: id,
         source_code: btoa(value),
-        stdin: btoa(form.stdin)
+        stdin: btoa(form.stdin),
       },
     };
 
     try {
       const response = await axios.request(options);
       console.log(response.data);
-      if(buttontype=="Submit"){
-
+      if (buttontype == "Submit") {
         const res = await axios.post(url + "/codes/add", {
           ...form,
           code: value,
           stdout: atob(response.data.stdout) || atob(response.data.message),
           status: response.data.status.description,
         });
-        setSubmitdissable(false)
+        setSubmitdissable(false);
         navigate("/page");
       } else {
-        if(response.data.stdout)
-        setOutput(atob(response.data.stdout))
-        else
-        setOutput(atob(response.data.message))
-      setRundissable(false)
+        if (response.data.stdout) setOutput(atob(response.data.stdout));
+        else setOutput(atob(response.data.message));
+        setRundissable(false);
       }
     } catch (error) {
       console.error(error);
@@ -173,31 +178,27 @@ export default function Landuppage() {
   return (
     <div className="w-full ">
       <div className="h-[100vh]  flex justify-center bg-hero-pattern bg-cover ">
-        
         <div className="flex flex-col items-center justify-center">
-        <div className="flex h-[18vh] w-[40vw] justify-between ">
-          <Lottie animationData={animationData2} />
-          <Lottie animationData={animationData3} />
+          <div className="flex h-[18vh] w-[40vw] justify-between ">
+            <Lottie animationData={animationData2} />
+            <Lottie animationData={animationData3} />
+          </div>
+          <div className="flex flex-col">
+            <div className="h-[60vh] w-full flex  justify-center">
+              <Lottie animationData={animationData} />
+            </div>
+            <p className="text-lg text-gray-300 italic font-semibold text-center">
+              "Code is the canvas, logic is the brush, and innovation is the
+              masterpiece."
+            </p>
+          </div>
+          <div className="flex h-[18vh] w-[60vw] justify-between ">
+            <Lottie animationData={animationData4} />
+            <Lottie animationData={animationData5} />
+          </div>
         </div>
-        <div className="flex flex-col">
-
-        <div className="h-[60vh] w-full flex  justify-center">
-          <Lottie animationData={animationData} />
-          
-        </div>
-        <p className="text-lg text-gray-300 italic font-semibold text-center">
-          "Code is the canvas, logic is the brush, and innovation is the masterpiece."
-      </p>
-         </div>
-        <div className="flex h-[18vh] w-[60vw] justify-between ">
-          <Lottie animationData={animationData4} />
-          <Lottie animationData={animationData5} />
-        </div>
-        </div>
-        
       </div>
       <div className="min-h-[100vh] bg-[#0e0a21] w-full flex items-center justify-center max-sm:flex-col">
-        
         <div className=" flex flex-1 p-5 gap-5 max-sm:flex-col ">
           <div className="w-3/5 max-sm:w-[90vw] max-sm:p-5">
             <CodeMirror
@@ -205,30 +206,259 @@ export default function Landuppage() {
               height="90vh"
               width="100%"
               theme={leetCodeTheme}
-              extensions={[form.language == 'java'?java():languageExtensions[form.language](),
-                
-                autocompletion({ override: [customCompletions[form.language]] }),
+              extensions={[
+                form.language == "java"
+                  ? java()
+                  : languageExtensions[form.language](),
 
-              
+                autocompletion({
+                  override: [customCompletions[form.language]],
+                }),
               ]}
               onChange={onChange}
-              style={{fontSize:"18px"}}
+              style={{ fontSize: "18px" }}
               maxWidth="80vw"
             />
           </div>
           <div className="flex flex-col flex-1 gap-5">
-            <div className="flex flex-col justify-between  items-center flex-1 max-sm:gap-5">
-              <div className="w-full flex gap-3 items-center flex-1 ">
-                
-                <button type="button" onClick={()=>{setRundissable(true);handleSubmit("Run") }} className={` text-white font-semibold  flex-1 h-[50%] max-sm:h-[48px]  rounded-md ${rundissable?"bg-[#323232] cursor-not-allowed ":"bg-[#2A2A2A] hover:bg-[#323232]"}` } disabled={rundissable}>{rundissable?<svg xmlns="http://www.w3.org/2000/svg" viewBox="-350 20 1000 200"><circle fill="#8DDEFF" stroke="#8DDEFF" stroke-width="2" r="15" cx="40" cy="65"><animate attributeName="cy" calcMode="spline" dur="2" values="65;135;65;" keySplines=".5 0 .5 1;.5 0 .5 1" repeatCount="indefinite" begin="-.4"></animate></circle><circle fill="#8DDEFF" stroke="#8DDEFF" stroke-width="2" r="15" cx="100" cy="65"><animate attributeName="cy" calcMode="spline" dur="2" values="65;135;65;" keySplines=".5 0 .5 1;.5 0 .5 1" repeatCount="indefinite" begin="-.2"></animate></circle><circle fill="#8DDEFF" stroke="#8DDEFF" stroke-width="2" r="15" cx="160" cy="65"><animate attributeName="cy" calcMode="spline" dur="2" values="65;135;65;" keySplines=".5 0 .5 1;.5 0 .5 1" repeatCount="indefinite" begin="0"></animate></circle></svg>:(<div className="flex justify-center gap-1">
-                  <Play size={25}/> <p>Run</p>
-                  </div> )}</button>
-                <button type="button" onClick={()=>{setSubmitdissable(true); handleSubmit("Submit")}} className={` text-[#66ff00] font-semibold flex-1 h-[50%] max-sm:h-[48px] rounded-md ${rundissable?"bg-[#323232] cursor-not-allowed":"bg-[#2A2A2A] hover:bg-[#323232]"}`} disabled={submitdissable}>{submitdissable?<svg xmlns="http://www.w3.org/2000/svg" viewBox="-350 20 1000 200"><circle fill="#00FF49" stroke="#00FF49" stroke-width="2" r="15" cx="40" cy="65"><animate attributeName="cy" calcMode="spline" dur="2" values="65;135;65;" keySplines=".5 0 .5 1;.5 0 .5 1" repeatCount="indefinite" begin="-.4"></animate></circle><circle fill="#00FF49" stroke="#00FF49" stroke-width="2" r="15" cx="100" cy="65"><animate attributeName="cy" calcMode="spline" dur="2" values="65;135;65;" keySplines=".5 0 .5 1;.5 0 .5 1" repeatCount="indefinite" begin="-.2"></animate></circle><circle fill="#00FF49" stroke="#00FF49" stroke-width="2" r="15" cx="160" cy="65"><animate attributeName="cy" calcMode="spline" dur="2" values="65;135;65;" keySplines=".5 0 .5 1;.5 0 .5 1" repeatCount="indefinite" begin="0"></animate></circle></svg>:<div className="flex justify-center gap-1">
-                  <CloudUpload color="#66ff00" size={25}/> <p>Submit</p>
-                  </div>}</button>
-                <button type="button" onClick={()=>{navigate("/collab")}} className={` text-[#ff34f1] font-semibold flex-1 h-[50%] max-sm:h-[48px] rounded-md ${rundissable?"bg-[#323232] cursor-not-allowed":"bg-[#2A2A2A]  hover:bg-[#323232]"}`} disabled={submitdissable}>{submitdissable?<svg xmlns="http://www.w3.org/2000/svg" viewBox="-350 20 1000 200"><circle fill="#00FF49" stroke="#00FF49" stroke-width="2" r="15" cx="40" cy="65"><animate attributeName="cy" calcMode="spline" dur="2" values="65;135;65;" keySplines=".5 0 .5 1;.5 0 .5 1" repeatCount="indefinite" begin="-.4"></animate></circle><circle fill="#00FF49" stroke="#00FF49" stroke-width="2" r="15" cx="100" cy="65"><animate attributeName="cy" calcMode="spline" dur="2" values="65;135;65;" keySplines=".5 0 .5 1;.5 0 .5 1" repeatCount="indefinite" begin="-.2"></animate></circle><circle fill="#00FF49" stroke="#00FF49" stroke-width="2" r="15" cx="160" cy="65"><animate attributeName="cy" calcMode="spline" dur="2" values="65;135;65;" keySplines=".5 0 .5 1;.5 0 .5 1" repeatCount="indefinite" begin="0"></animate></circle></svg>:<div className="flex justify-center gap-1">
-                  <Handshake color="#ff34f1" size={25}/> <p>Collab</p>
-                  </div>}</button>
+            <div className="flex flex-col justify-between  flex-1 max-sm:gap-5">
+              <div className="w-full flex gap-3  flex-1 ">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setRundissable(true);
+                    handleSubmit("Run");
+                  }}
+                  className={` text-white font-semibold  flex-1 h-[60%] max-sm:h-[48px]  rounded-md ${
+                    rundissable
+                      ? "bg-[#323232] cursor-not-allowed "
+                      : "bg-[#2A2A2A] hover:bg-[#323232]"
+                  }`}
+                  disabled={rundissable}
+                >
+                  {rundissable ? (
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="-350 20 1000 200"
+                    >
+                      <circle
+                        fill="#8DDEFF"
+                        stroke="#8DDEFF"
+                        stroke-width="2"
+                        r="15"
+                        cx="40"
+                        cy="65"
+                      >
+                        <animate
+                          attributeName="cy"
+                          calcMode="spline"
+                          dur="2"
+                          values="65;135;65;"
+                          keySplines=".5 0 .5 1;.5 0 .5 1"
+                          repeatCount="indefinite"
+                          begin="-.4"
+                        ></animate>
+                      </circle>
+                      <circle
+                        fill="#8DDEFF"
+                        stroke="#8DDEFF"
+                        stroke-width="2"
+                        r="15"
+                        cx="100"
+                        cy="65"
+                      >
+                        <animate
+                          attributeName="cy"
+                          calcMode="spline"
+                          dur="2"
+                          values="65;135;65;"
+                          keySplines=".5 0 .5 1;.5 0 .5 1"
+                          repeatCount="indefinite"
+                          begin="-.2"
+                        ></animate>
+                      </circle>
+                      <circle
+                        fill="#8DDEFF"
+                        stroke="#8DDEFF"
+                        stroke-width="2"
+                        r="15"
+                        cx="160"
+                        cy="65"
+                      >
+                        <animate
+                          attributeName="cy"
+                          calcMode="spline"
+                          dur="2"
+                          values="65;135;65;"
+                          keySplines=".5 0 .5 1;.5 0 .5 1"
+                          repeatCount="indefinite"
+                          begin="0"
+                        ></animate>
+                      </circle>
+                    </svg>
+                  ) : (
+                    <div className="flex justify-center gap-1">
+                      <Play size={25} /> <p>Run</p>
+                    </div>
+                  )}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSubmitdissable(true);
+                    handleSubmit("Submit");
+                  }}
+                  className={` text-[#66ff00] font-semibold flex-1 h-[60%] max-sm:h-[48px] rounded-md ${
+                    rundissable
+                      ? "bg-[#323232] cursor-not-allowed"
+                      : "bg-[#2A2A2A] hover:bg-[#323232]"
+                  }`}
+                  disabled={submitdissable}
+                >
+                  {submitdissable ? (
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="-350 20 1000 200"
+                    >
+                      <circle
+                        fill="#00FF49"
+                        stroke="#00FF49"
+                        stroke-width="2"
+                        r="15"
+                        cx="40"
+                        cy="65"
+                      >
+                        <animate
+                          attributeName="cy"
+                          calcMode="spline"
+                          dur="2"
+                          values="65;135;65;"
+                          keySplines=".5 0 .5 1;.5 0 .5 1"
+                          repeatCount="indefinite"
+                          begin="-.4"
+                        ></animate>
+                      </circle>
+                      <circle
+                        fill="#00FF49"
+                        stroke="#00FF49"
+                        stroke-width="2"
+                        r="15"
+                        cx="100"
+                        cy="65"
+                      >
+                        <animate
+                          attributeName="cy"
+                          calcMode="spline"
+                          dur="2"
+                          values="65;135;65;"
+                          keySplines=".5 0 .5 1;.5 0 .5 1"
+                          repeatCount="indefinite"
+                          begin="-.2"
+                        ></animate>
+                      </circle>
+                      <circle
+                        fill="#00FF49"
+                        stroke="#00FF49"
+                        stroke-width="2"
+                        r="15"
+                        cx="160"
+                        cy="65"
+                      >
+                        <animate
+                          attributeName="cy"
+                          calcMode="spline"
+                          dur="2"
+                          values="65;135;65;"
+                          keySplines=".5 0 .5 1;.5 0 .5 1"
+                          repeatCount="indefinite"
+                          begin="0"
+                        ></animate>
+                      </circle>
+                    </svg>
+                  ) : (
+                    <div className="flex justify-center gap-1">
+                      <CloudUpload color="#66ff00" size={25} /> <p>Submit</p>
+                    </div>
+                  )}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    navigate("/collab");
+                  }}
+                  className={` text-[#ff34f1] font-semibold flex-1 h-[60%] max-sm:h-[48px] rounded-md ${
+                    rundissable
+                      ? "bg-[#323232] cursor-not-allowed"
+                      : "bg-[#2A2A2A]  hover:bg-[#323232]"
+                  }`}
+                  disabled={submitdissable}
+                >
+                  {submitdissable ? (
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="-350 20 1000 200"
+                    >
+                      <circle
+                        fill="#00FF49"
+                        stroke="#00FF49"
+                        stroke-width="2"
+                        r="15"
+                        cx="40"
+                        cy="65"
+                      >
+                        <animate
+                          attributeName="cy"
+                          calcMode="spline"
+                          dur="2"
+                          values="65;135;65;"
+                          keySplines=".5 0 .5 1;.5 0 .5 1"
+                          repeatCount="indefinite"
+                          begin="-.4"
+                        ></animate>
+                      </circle>
+                      <circle
+                        fill="#00FF49"
+                        stroke="#00FF49"
+                        stroke-width="2"
+                        r="15"
+                        cx="100"
+                        cy="65"
+                      >
+                        <animate
+                          attributeName="cy"
+                          calcMode="spline"
+                          dur="2"
+                          values="65;135;65;"
+                          keySplines=".5 0 .5 1;.5 0 .5 1"
+                          repeatCount="indefinite"
+                          begin="-.2"
+                        ></animate>
+                      </circle>
+                      <circle
+                        fill="#00FF49"
+                        stroke="#00FF49"
+                        stroke-width="2"
+                        r="15"
+                        cx="160"
+                        cy="65"
+                      >
+                        <animate
+                          attributeName="cy"
+                          calcMode="spline"
+                          dur="2"
+                          values="65;135;65;"
+                          keySplines=".5 0 .5 1;.5 0 .5 1"
+                          repeatCount="indefinite"
+                          begin="0"
+                        ></animate>
+                      </circle>
+                    </svg>
+                  ) : (
+                    <div className="flex justify-center gap-1">
+                      <Handshake color="#ff34f1" size={25} /> <p>Collab</p>
+                    </div>
+                  )}
+                </button>
               </div>
               <div className="grid grid-cols-2 md:grid-cols-4 w-full gap-4">
                 {languages.map((lang) => (
@@ -242,8 +472,8 @@ export default function Landuppage() {
             }
            hover:scale-105 transition-transform cursor-pointer`}
                     onClick={() => {
-                      if(lang.id == 'java')
-                        alert("please use Main as the class name")
+                      if (lang.id == "java")
+                        alert("please use Main as the class name");
                       setSelectedLanguage(lang.id);
                       setForm((prev) => {
                         return { ...prev, language: lang.id };
@@ -309,7 +539,9 @@ export default function Landuppage() {
                   <h3 className="text-lg font-semibold mb-2 text-center">
                     Output
                   </h3>
-                  <pre className="whitespace-pre-wrap break-words">{output}</pre>
+                  <pre className="whitespace-pre-wrap break-words">
+                    {output}
+                  </pre>
                 </div>
               )}
             </div>
