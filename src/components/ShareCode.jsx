@@ -30,7 +30,7 @@ const leetCodeTheme = createTheme({
 import { javascript } from '@codemirror/lang-javascript';
 const ShareCode = () => {
     const param=useParams()
-    const url=import.meta.env.VITE_backendurl || "https://coderunner-backend-1xek.onrender.com"
+    const url=import.meta.env.VITE_backendurl || "http://localhost:3000"
     const [code,setCode] = useState()
     useEffect(()=>{
         async function getcode(){

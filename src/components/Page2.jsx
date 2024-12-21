@@ -7,7 +7,8 @@ import { MoveLeft } from 'lucide-react';
 import { Redis } from "https://esm.sh/@upstash/redis";
 import animationData from "../assets/loading_animation.json"
 import Lottie from "lottie-react";
-
+import { ToastContainer } from "react-toastify";
+import { Bounce } from "react-toastify";
 const client = new Redis({
     url: import.meta.env.VITE_reddisurl || "https://generous-eel-36876.upstash.io",
     token: import.meta.env.VITE_reddistoken || "AZAMAAIjcDFkMTY1M2M2MzYyNDk0ZDJmYWI0NDZiMGMzNjc0NDgwYXAxMA",
@@ -94,6 +95,19 @@ export default function Page2(){
         </tbody>
       </table>
 </div>
+<ToastContainer
+position="top-right"
+autoClose={5000}
+hideProgressBar
+newestOnTop={false}
+closeOnClick={false}
+rtl={false}
+pauseOnFocusLoss
+draggable
+pauseOnHover
+theme="dark"
+transition={Bounce}
+/>
 </div>
 )
 
