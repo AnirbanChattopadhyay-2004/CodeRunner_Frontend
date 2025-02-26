@@ -42,14 +42,13 @@ const languageExtensions = {
 export default function CollabCode() {
   const [socket, setSocket] = useState(null);
   const [code, setCode] = useState();
-  const url =
-    import.meta.env.VITE_backendurl ||
-    "http://localhost:3000";
+  const url = import.meta.env.VITE_backendurl || "http://localhost:3000";
   const navigate = useNavigate();
   const param = useParams();
   const room = param.room;
+  const collab_url = import.meta.env.VITE_collab_url || "http://localhost:3001";
   useEffect(() => {
-    const newSocket = io("https://coderunnerwebsocket-backend.onrender.com");
+    const newSocket = io(collab_url);
     setSocket(newSocket);
     // Cleanup function to disconnect socket on component unmount
     return () => {
@@ -70,7 +69,7 @@ export default function CollabCode() {
     return () => {
       socket?.removeAllListeners();
     };
-  }, [socket]);
+  }, [socket, room]);
 
   const [form, setForm] = useState({
     name: "",
@@ -86,46 +85,51 @@ export default function CollabCode() {
   async function handleSubmit(buttontype) {
     // e.preventDefault();
 
-    let id = 62;
-    if (form.language == "javascript") id = 63;
-    else if (form.language == "python") id = 71;
-    else if (form.language == "cpp") id = 54;
-    // console.log(value)
-    const options = {
-      method: "POST",
-      url: import.meta.env.VITE_rapidAPIURL,
-      params: {
-        base64_encoded: "true",
+    // e.preventDefault();
 
-        wait: "true",
-      },
-      headers: {
-        "Content-Type": "application/json",
-        "x-rapidapi-key": import.meta.env.VITE_rapidAPIKey,
-        "x-rapidapi-host": import.meta.env.VITE_host,
-      },
-      data: {
-        language_id: id,
-        source_code: btoa(code),
-        stdin: btoa(form.stdin),
-      },
-    };
+    // let id = 62;
+    // if (form.language == "javascript") id = 63;
+    // else if (form.language == "python") id = 71;
+    // else if (form.language == "cpp") id = 54;
+    // console.log(value);
+    // const options = {
+    //   method: "POST",
+    //   url: import.meta.env.VITE_rapidAPIURL,
+    //   params: {
+    //     base64_encoded: "true",
+
+    //     wait: "true",
+    //   },
+    //   headers: {
+    //     "Content-Type": "application/json",
+    //     "x-rapidapi-key": import.meta.env.VITE_rapidAPIKey,
+    //     "x-rapidapi-host": import.meta.env.VITE_host,
+    //   },
+    //   data: {
+    //     language_id: id,
+    //     source_code: btoa(value),
+    //     stdin: btoa(form.stdin),
+    //   },
+    // };
 
     try {
-      const response = await axios.request(options);
-      console.log(response.data);
+      const response = await axios.post(
+        "https://code-runner-docket-backend.onrender.com/run",
+        { language: form.language, code: value, input: form.stdin }
+      );
+      // const response = await axios.post("http://localhost:3000/run",{language:form.language,code:value,input:form.stdin});
+      // console.log(response.data);
       if (buttontype == "Submit") {
         const res = await axios.post(url + "/codes/add", {
           ...form,
-          code: code,
+          code: value,
           stdout: atob(response.data.stdout) || atob(response.data.message),
           status: response.data.status.description,
         });
         setSubmitdissable(false);
         navigate("/page");
       } else {
-        if (response.data.stdout) setOutput(atob(response.data.stdout));
-        else setOutput(atob(response.data.message));
+        setOutput(response.data.output);
         setRundissable(false);
       }
     } catch (error) {
@@ -172,19 +176,19 @@ export default function CollabCode() {
               ]}
               onChange={onChange}
               style={{ fontSize: "18px" }}
-              maxWidth="80vw"
+              maxWidth="95vw"
             />
           </div>
           <div className="flex flex-col flex-1 gap-5">
-            <div className="flex flex-col justify-between  items-center flex-1 max-sm:gap-5">
-              <div className="w-full flex gap-3  flex-1 ">
+            <div className="flex flex-col flex-2 justify-start   items-stretch  max-sm:gap-5">
+              <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2  gap-3 mb-5">
                 <button
                   type="button"
                   onClick={() => {
                     setRundissable(true);
                     handleSubmit("Run");
                   }}
-                  className={` text-white font-semibold  flex-1 h-[60%] max-sm:h-[48px]  rounded-md ${
+                  className={` text-white font-semibold  flex-1 p-3 max-sm:h-[48px]  rounded-md  ${
                     rundissable
                       ? "bg-[#323232] cursor-not-allowed "
                       : "bg-[#2A2A2A] hover:bg-[#323232]"
@@ -263,7 +267,7 @@ export default function CollabCode() {
                     setSubmitdissable(true);
                     handleSubmit("Submit");
                   }}
-                  className={` text-[#66ff00] font-semibold flex-1 h-[60%] max-sm:h-[48px] rounded-md ${
+                  className={` text-[#66ff00]  font-semibold  flex-1 p-3 max-sm:h-[48px]  rounded-md ${
                     rundissable
                       ? "bg-[#323232] cursor-not-allowed"
                       : "bg-[#2A2A2A] hover:bg-[#323232]"
@@ -336,6 +340,7 @@ export default function CollabCode() {
                     </div>
                   )}
                 </button>
+
               </div>
               <div className="grid grid-cols-2 md:grid-cols-4 w-full gap-4">
                 {languages.map((lang) => (
@@ -367,7 +372,7 @@ export default function CollabCode() {
                 ))}
               </div>
             </div>
-            <div>
+            <div className="flex flex-1 items-center">
               <input
                 type="text"
                 name="name"
@@ -378,7 +383,7 @@ export default function CollabCode() {
                 required
               />
             </div>
-            <div className="flex flex-col gap-1">
+            <div className="flex flex-col gap-1 flex-3">
               <div className="flex justify-center mb-4 gap-3">
                 <button
                   className={`px-4 py-2 border-b-2 flex-1 rounded-md ${
@@ -409,10 +414,10 @@ export default function CollabCode() {
                   onChange={handlechange}
                   placeholder="Enter Standard Input"
                   rows={10}
-                  className="w-full p-2 bg-[#2A2A2A] text-white rounded-md resize-none"
+                  className="w-full p-3 bg-[#2A2A2A] text-white rounded-md resize-none"
                 ></textarea>
               ) : (
-                <div className="p-2 bg-[#2A2A2A] text-white rounded-md overflow-scroll min-h-[37.5vh] max-h-[37.5vh]">
+                <div className="p-2 bg-[#2A2A2A] text-white rounded-md overflow-scroll min-h-[38.5vh] max-h-[38.5vh]">
                   <h3 className="text-lg font-semibold mb-2 text-center">
                     Output
                   </h3>

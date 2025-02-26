@@ -95,9 +95,7 @@ const languageExtensions = {
   cpp: cpp,
 };
 export default function Landuppage() {
-  const url =
-    import.meta.env.VITE_backendurl ||
-    "http://localhost:3000";
+  const url = import.meta.env.VITE_backendurl || "http://localhost:3000";
   const navigate = useNavigate();
   const [form, setForm] = useState({
     name: "",
@@ -106,40 +104,46 @@ export default function Landuppage() {
   });
   const [rundissable, setRundissable] = useState(false);
   const [submitdissable, setSubmitdissable] = useState(false);
+  const [collabdissable, setCollabdissable] = useState(false);
   const [output, setOutput] = useState("");
-  const [selectedLanguage, setSelectedLanguage] = useState();
+  const [selectedLanguage, setSelectedLanguage] = useState("javascript");
   const [activeTab, setActiveTab] = useState("input");
+  // const [defaultcode,setDefaultcode] = useState("Console.log('Hello World')")
   async function handleSubmit(buttontype) {
     // e.preventDefault();
 
-    let id = 62;
-    if (form.language == "javascript") id = 63;
-    else if (form.language == "python") id = 71;
-    else if (form.language == "cpp") id = 54;
-    console.log(value);
-    const options = {
-      method: "POST",
-      url: import.meta.env.VITE_rapidAPIURL,
-      params: {
-        base64_encoded: "true",
+    // let id = 62;
+    // if (form.language == "javascript") id = 63;
+    // else if (form.language == "python") id = 71;
+    // else if (form.language == "cpp") id = 54;
+    // console.log(value);
+    // const options = {
+    //   method: "POST",
+    //   url: import.meta.env.VITE_rapidAPIURL,
+    //   params: {
+    //     base64_encoded: "true",
 
-        wait: "true",
-      },
-      headers: {
-        "Content-Type": "application/json",
-        "x-rapidapi-key": import.meta.env.VITE_rapidAPIKey,
-        "x-rapidapi-host": import.meta.env.VITE_host,
-      },
-      data: {
-        language_id: id,
-        source_code: btoa(value),
-        stdin: btoa(form.stdin),
-      },
-    };
+    //     wait: "true",
+    //   },
+    //   headers: {
+    //     "Content-Type": "application/json",
+    //     "x-rapidapi-key": import.meta.env.VITE_rapidAPIKey,
+    //     "x-rapidapi-host": import.meta.env.VITE_host,
+    //   },
+    //   data: {
+    //     language_id: id,
+    //     source_code: btoa(value),
+    //     stdin: btoa(form.stdin),
+    //   },
+    // };
 
     try {
-      const response = await axios.request(options);
-      console.log(response.data);
+      const response = await axios.post(
+        "https://code-runner-docket-backend.onrender.com/run",
+        { language: form.language, code: value, input: form.stdin }
+      );
+      // const response = await axios.post("http://localhost:3000/run",{language:form.language,code:value,input:form.stdin});
+      // console.log(response.data);
       if (buttontype == "Submit") {
         const res = await axios.post(url + "/codes/add", {
           ...form,
@@ -150,15 +154,15 @@ export default function Landuppage() {
         setSubmitdissable(false);
         navigate("/page");
       } else {
-        if (response.data.stdout) setOutput(atob(response.data.stdout));
-        else setOutput(atob(response.data.message));
+        setOutput(response.data.output);
         setRundissable(false);
       }
     } catch (error) {
       console.error(error);
     }
   }
-  const [value, setValue] = useState();
+
+  const [value, setValue] = useState("console.log('Hello World')");
   const onChange = (val) => {
     setValue(val);
   };
@@ -172,7 +176,7 @@ export default function Landuppage() {
   function handlechange(e) {
     const { name, value } = e.target;
     if (value == "java")
-      alert("Please keep the main method inside class Main to run the code");
+      alert("Please keep the main method inside class Code to run the code");
     setForm({ ...form, [name]: value });
   }
   return (
@@ -198,7 +202,7 @@ export default function Landuppage() {
           </div>
         </div>
       </div>
-      <div className="min-h-[100vh] bg-[#0e0a21] w-full flex items-center justify-center max-sm:flex-col">
+      <div className="min-h-[100vh] bg-[#0e0a21] w-full flex flex-wrap items-center justify-center max-sm:flex-col">
         <div className=" flex flex-1 p-5 gap-5 max-sm:flex-col ">
           <div className="w-3/5 max-sm:w-[90vw] max-sm:p-5">
             <CodeMirror
@@ -220,16 +224,16 @@ export default function Landuppage() {
               maxWidth="80vw"
             />
           </div>
-          <div className="flex flex-col flex-1 gap-5">
-            <div className="flex flex-col justify-between  flex-1 max-sm:gap-5">
-              <div className="w-full flex gap-3  flex-1 ">
+          <div className="flex flex-col flex-1 gap-5 w-full">
+            <div className="flex flex-col justify-between  max-sm:gap-5 w-full">
+              <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3  gap-3 mb-5 ">
                 <button
                   type="button"
                   onClick={() => {
                     setRundissable(true);
                     handleSubmit("Run");
                   }}
-                  className={` text-white font-semibold  flex-1 h-[60%] max-sm:h-[48px]  rounded-md ${
+                  className={` text-white font-semibold  flex-1 p-3 max-sm:h-[48px]  rounded-md ${
                     rundissable
                       ? "bg-[#323232] cursor-not-allowed "
                       : "bg-[#2A2A2A] hover:bg-[#323232]"
@@ -308,7 +312,7 @@ export default function Landuppage() {
                     setSubmitdissable(true);
                     handleSubmit("Submit");
                   }}
-                  className={` text-[#66ff00] font-semibold flex-1 h-[60%] max-sm:h-[48px] rounded-md ${
+                  className={` text-[#66ff00] font-semibold flex-1 p-3 max-sm:h-[48px] rounded-md ${
                     rundissable
                       ? "bg-[#323232] cursor-not-allowed"
                       : "bg-[#2A2A2A] hover:bg-[#323232]"
@@ -386,81 +390,15 @@ export default function Landuppage() {
                   onClick={() => {
                     navigate("/collab");
                   }}
-                  className={` text-[#ff34f1] font-semibold flex-1 h-[60%] max-sm:h-[48px] rounded-md ${
-                    rundissable
-                      ? "bg-[#323232] cursor-not-allowed"
-                      : "bg-[#2A2A2A]  hover:bg-[#323232]"
-                  }`}
-                  disabled={submitdissable}
+                  className={` text-[#ff34f1]  font-semibold flex-1 p-3 max-sm:h-[48px] rounded-md  bg-[#2A2A2A]  hover:bg-[#323232]`}
+                  disabled={collabdissable}
                 >
-                  {submitdissable ? (
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="-350 20 1000 200"
-                    >
-                      <circle
-                        fill="#00FF49"
-                        stroke="#00FF49"
-                        stroke-width="2"
-                        r="15"
-                        cx="40"
-                        cy="65"
-                      >
-                        <animate
-                          attributeName="cy"
-                          calcMode="spline"
-                          dur="2"
-                          values="65;135;65;"
-                          keySplines=".5 0 .5 1;.5 0 .5 1"
-                          repeatCount="indefinite"
-                          begin="-.4"
-                        ></animate>
-                      </circle>
-                      <circle
-                        fill="#00FF49"
-                        stroke="#00FF49"
-                        stroke-width="2"
-                        r="15"
-                        cx="100"
-                        cy="65"
-                      >
-                        <animate
-                          attributeName="cy"
-                          calcMode="spline"
-                          dur="2"
-                          values="65;135;65;"
-                          keySplines=".5 0 .5 1;.5 0 .5 1"
-                          repeatCount="indefinite"
-                          begin="-.2"
-                        ></animate>
-                      </circle>
-                      <circle
-                        fill="#00FF49"
-                        stroke="#00FF49"
-                        stroke-width="2"
-                        r="15"
-                        cx="160"
-                        cy="65"
-                      >
-                        <animate
-                          attributeName="cy"
-                          calcMode="spline"
-                          dur="2"
-                          values="65;135;65;"
-                          keySplines=".5 0 .5 1;.5 0 .5 1"
-                          repeatCount="indefinite"
-                          begin="0"
-                        ></animate>
-                      </circle>
-                    </svg>
-                  ) : (
-                    <div className="flex justify-center gap-1">
-                      <Handshake color="#ff34f1" size={25} /> <p>Collab</p>
-                    </div>
-                  )}
+                  <div className="flex justify-center gap-1">
+                    <Handshake color="#ff34f1" size={25} /> <p>Collab</p>
+                  </div>
                 </button>
               </div>
-              <div className="grid grid-cols-2 md:grid-cols-4 w-full gap-4">
+              <div className="grid  grid-cols-2 md:grid-cols-4 lg:grid-cols-4   w-full gap-4 xl:gap-6">
                 {languages.map((lang) => (
                   <div
                     key={lang.id}
@@ -472,8 +410,17 @@ export default function Landuppage() {
             }
            hover:scale-105 transition-transform cursor-pointer`}
                     onClick={() => {
-                      if (lang.id == "java")
-                        alert("please use Main as the class name");
+                      if (lang.id == "java") {
+                        setValue(
+                          `public class Code{\n public static void main(String args[]){\n System.out.println("Hello World")\n} \n}`
+                        );
+                        alert("please use Code as the class name");
+                      } else if (lang.id == "python")
+                        setValue("print('Hello World')");
+                      else if (lang.id == "cpp")
+                        setValue(
+                          "#include <iostream>\nusing namespace std;\nint main() {\n  cout << 'Hello World!';return 0}"
+                        );
                       setSelectedLanguage(lang.id);
                       setForm((prev) => {
                         return { ...prev, language: lang.id };
@@ -490,19 +437,19 @@ export default function Landuppage() {
                 ))}
               </div>
             </div>
-            <div>
+            <div className="flex-1 flex items-center">
               <input
                 type="text"
                 name="name"
                 value={form.name}
                 onChange={handlechange}
-                className="bg-[#2A2A2A] h-12 rounded-lg  w-[100%] border-none outline-none p-5 text-white-100"
+                className="bg-[#2A2A2A] h-12 rounded-lg w-[100%] border-none outline-none p-5 text-white-100"
                 placeholder="What's your good name?"
                 required
               />
             </div>
-            <div className="flex flex-col gap-1">
-              <div className="flex justify-center mb-4 gap-3">
+            <div className="flex flex-col flex-3 gap-1 w-full">
+              <div className="flex flex-1 justify-center mb-4 gap-3">
                 <button
                   className={`px-4 py-2 border-b-2 flex-1 rounded-md ${
                     activeTab === "input"
@@ -524,30 +471,30 @@ export default function Landuppage() {
                   Output
                 </button>
               </div>
-
-              {activeTab === "input" ? (
-                <textarea
-                  name="stdin"
-                  value={form.stdin}
-                  onChange={handlechange}
-                  placeholder="Enter Standard Input"
-                  rows={10}
-                  className="w-full p-2 bg-[#2A2A2A] text-white rounded-md resize-none"
-                ></textarea>
-              ) : (
-                <div className="p-2 bg-[#2A2A2A] text-white rounded-md overflow-scroll min-h-[37.5vh] max-h-[37.5vh]">
-                  <h3 className="text-lg font-semibold mb-2 text-center">
-                    Output
-                  </h3>
-                  <pre className="whitespace-pre-wrap break-words">
-                    {output}
-                  </pre>
-                </div>
-              )}
+                {activeTab === "input" ? (
+                  <textarea
+                    name="stdin"
+                    value={form.stdin}
+                    onChange={handlechange}
+                    placeholder="Enter Standard Input"
+                    rows={10}
+                    className="w-full  p-3  bg-[#2A2A2A] text-white rounded-md resize-none"
+                  ></textarea>
+                ) : (
+                  <div className="p-2  bg-[#2A2A2A] text-white rounded-md overflow-scroll min-h-[38.5vh] ">
+                    <h3 className="text-lg font-semibold mb-2 text-center">
+                      Output
+                    </h3>
+                    <pre className="whitespace-pre-wrap break-words">
+                      {output}
+                    </pre>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
+    
   );
 }
