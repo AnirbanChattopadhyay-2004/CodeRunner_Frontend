@@ -114,7 +114,7 @@ export default function CollabCode() {
 
     try {
       const response = await axios.post(
-        "https://code-runner-docket-backend.onrender.com/run",
+        "https://coderunner-docker-backend.onrender.com/run",
         { language: form.language, code: value, input: form.stdin }
       );
       // const response = await axios.post("http://localhost:3000/run",{language:form.language,code:value,input:form.stdin});
