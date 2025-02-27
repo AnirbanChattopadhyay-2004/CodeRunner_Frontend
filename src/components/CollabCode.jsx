@@ -123,8 +123,8 @@ export default function CollabCode() {
         const res = await axios.post(url + "/codes/add", {
           ...form,
           code: value,
-          stdout: atob(response.data.stdout) || atob(response.data.message),
-          status: response.data.status.description,
+          stdout: output,
+          status: output.substring(0,5) == "Error"?output.substring(output.indexOf(":"),output.indexOf(":",output.indexOf(":")+1)):"Accepted",
         });
         setSubmitdissable(false);
         navigate("/page");

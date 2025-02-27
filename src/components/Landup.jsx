@@ -148,8 +148,8 @@ export default function Landuppage() {
         const res = await axios.post(url + "/codes/add", {
           ...form,
           code: value,
-          stdout: atob(response.data.stdout) || atob(response.data.message),
-          status: response.data.status.description,
+          stdout: output,
+          status: output.substring(0,5) == "Error"?output.substring(output.indexOf(":"),output.indexOf(":",output.indexOf(":")+1)):"Accepted",
         });
         setSubmitdissable(false);
         navigate("/page");
@@ -421,6 +421,11 @@ export default function Landuppage() {
                         setValue(
                           "#include <iostream>\nusing namespace std;\nint main() {\n  cout << 'Hello World!';return 0}"
                         );
+                        else 
+                        setValue(
+                          "console.log('Hello World')"
+                        );
+
                       setSelectedLanguage(lang.id);
                       setForm((prev) => {
                         return { ...prev, language: lang.id };
